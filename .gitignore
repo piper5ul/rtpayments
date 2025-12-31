@@ -1,0 +1,16 @@
+# Exclude subdirectories that are separate git repositories
+titan-backend-services/
+titan-consumer-ios/
+titan-merchant-ios/
+titan-consumer-android/
+titan-merchant-android/
+admin-dashboard/
+api-contracts/
+external_repos/
+
+# Mac
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
