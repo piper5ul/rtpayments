@@ -1,0 +1,78 @@
+# docker-compose.override.yml
+#
+# Use this if you already have PostgreSQL/Redis running locally
+# Copy this file to docker-compose.override.yml and customize
+#
+# How to use:
+# 1. cp docker-compose.override.example.yml docker-compose.override.yml
+# 2. Update DATABASE_URL with your local credentials
+# 3. Run: docker-compose up
+#
+# This file is gitignored to keep your local credentials private
+
+version: '3.8'
+
+services:
+  # Option 1: Use existing local PostgreSQL
+  # Remove the postgres service and use your local one
+  postgres:
+    image: tianon/true  # Dummy container (does nothing)
+    restart: "no"
+
+  # Update all services to use your local PostgreSQL
+  blnk:
+    environment:
+      - CONFIG_FILE=/blnk.json
+    # Override blnk.json to use local PostgreSQL
+    volumes:
+      - ./config/blnk-local.json:/blnk.json
+
+  hrs:
+    environment:
+      # Use your local PostgreSQL
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+      # host.docker.internal = your Mac's localhost from Docker
+
+  payment-router:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+
+  ach-service:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+
+  auth-service:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+
+  notification-service:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+
+  user-management:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamada99@host.docker.internal:5432/blnk?sslmode=disable
+
+  webhook-service:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+
+  reconciliation:
+    environment:
+      - POSTGRES_URL=postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable
+
+  # Option 2: Use existing local Redis (if you have one)
+  # redis:
+  #   image: tianon/true
+  #   restart: "no"
+  #
+  # Then update services to use:
+  # - REDIS_URL=redis://host.docker.internal:6379
+
+  # Option 3: Change Docker PostgreSQL port to avoid conflict
+  # If you want to keep both local and Docker PostgreSQL running
+  # postgres:
+  #   ports:
+  #     - "5433:5432"  # Docker PostgreSQL on 5433 instead of 5432
+  #   # Then services use: postgresql://blnk:password@postgres:5432
+  #   # (Inside Docker network, still port 5432)

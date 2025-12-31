@@ -1,0 +1,22 @@
+{
+  "project_name": "Titan Wallet Ledger",
+  "data_source": {
+    "dns": "postgresql://pushkar:dhamaka99@host.docker.internal:5432/blnk?sslmode=disable"
+  },
+  "redis": {
+    "dns": "redis://redis:6379"
+  },
+  "typesense": {
+    "dns": "http://typesense:8108"
+  },
+  "type_sense_key": "dev_api_key_12345",
+  "server": {
+    "port": "5001",
+    "ssl": false
+  },
+  "notification": {
+    "slack": {
+      "webhook_url": ""
+    }
+  }
+}
