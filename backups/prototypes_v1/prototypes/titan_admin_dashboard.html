@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Wallet - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: #1d1d1f;
+            color: white;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 0 24px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .logo p {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            width: 24px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 28px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f5f5f7;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .btn-success {
+            background: #34c759;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .stat-change.positive {
+            color: #34c759;
+        }
+
+        .stat-change.negative {
+            color: #ff3b30;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 12px;
+            background: #f9f9fb;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table tr:hover {
+            background: #f9f9fb;
+            cursor: pointer;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e5f5e5;
+            color: #34c759;
+        }
+
+        .badge-warning {
+            background: #fff5e5;
+            color: #ff9500;
+        }
+
+        .badge-error {
+            background: #ffe5e5;
+            color: #ff3b30;
+        }
+
+        .badge-info {
+            background: #e5f0ff;
+            color: #007aff;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #e5f5e5;
+            border-left: 4px solid #34c759;
+            color: #1a7a2e;
+        }
+
+        .alert-warning {
+            background: #fff5e5;
+            border-left: 4px solid #ff9500;
+            color: #8b5a00;
+        }
+
+        .alert-error {
+            background: #ffe5e5;
+            border-left: 4px solid #ff3b30;
+            color: #8b0000;
+        }
+
+        .alert-info {
+            background: #e5f0ff;
+            border-left: 4px solid #007aff;
+            color: #004085;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .metric-value {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .risk-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        .risk-low {
+            background: #e5f5e5;
+            color: #34c759;
+        }
+
+        .risk-medium {
+            background: #fff5e5;
+            color: #ff9500;
+        }
+
+        .risk-high {
+            background: #ffe5e5;
+            color: #ff3b30;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .document-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .document-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .document-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .document-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .document-status {
+            font-size: 12px;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f5f5f7 0%, #e0e0e0 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>💳 Titan Admin</h1>
+            <p>Operations Dashboard</p>
+        </div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showPage('users')">
+            <span class="nav-icon">👥</span>
+            <span>User Management</span>
+        </div>
+        <div class="nav-item" onclick="showPage('kyc')">
+            <span class="nav-icon">🔍</span>
+            <span>KYC Review</span>
+        </div>
+        <div class="nav-item" onclick="showPage('transactions')">
+            <span class="nav-icon">💸</span>
+            <span>Transactions</span>
+        </div>
+        <div class="nav-item" onclick="showPage('fraud')">
+            <span class="nav-icon">🛡️</span>
+            <span>Fraud Detection</span>
+        </div>
+        <div class="nav-item" onclick="showPage('reconciliation')">
+            <span class="nav-icon">⚖️</span>
+            <span>Reconciliation</span>
+        </div>
+        <div class="nav-item" onclick="showPage('reports')">
+            <span class="nav-icon">📈</span>
+            <span>Reports & Analytics</span>
+        </div>
+        <div class="nav-item" onclick="showPage('system')">
+            <span class="nav-icon">⚙️</span>
+            <span>System Config</span>
+        </div>
+        <div class="nav-item" onclick="showPage('audit')">
+            <span class="nav-icon">📝</span>
+            <span>Audit Logs</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active">
+            <div class="header">
+                <div>
+                    <h2>Dashboard Overview</h2>
+                    <p style="color: #888; margin-top: 4px;">Real-time system metrics and health</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">Export Report</button>
+                    <button class="btn btn-primary">Refresh</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1,234</div>
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-change positive">↑ 12.5% vs last week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$2.4M</div>
+                    <div class="stat-label">Total Volume (24h)</div>
+                    <div class="stat-change positive">↑ 8.3% vs yesterday</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5,678</div>
+                    <div class="stat-label">Transactions (24h)</div>
+                    <div class="stat-change positive">↑ 15.2% vs yesterday</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.03%</div>
+                    <div class="stat-label">Fraud Rate</div>
+                    <div class="stat-change negative">↓ 0.02% vs last week</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">System Health</h3>
+                    <span class="badge badge-success">All Systems Operational</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">HRS Service</span>
+                    <span class="metric-value" style="color: #34c759;">✓ Healthy (avg 3ms latency)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Payment Router</span>
+                    <span class="metric-value" style="color: #34c759;">✓ Healthy (10 pods running)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Blnk Ledger</span>
+                    <span class="metric-value" style="color: #34c759;">✓ Healthy (PostgreSQL: 45% CPU)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Trice.co RTP</span>
+                    <span class="metric-value" style="color: #34c759;">✓ Connected (99.98% uptime)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Redis Cluster</span>
+                    <span class="metric-value" style="color: #34c759;">✓ Healthy (94% cache hit rate)</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Alerts</h3>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>High Velocity Alert</strong><br>
+                    User @bob exceeded velocity limit (15 transactions in 1 hour)<br>
+                    <small style="color: #888;">5 minutes ago • <a href="#" onclick="showUserDetail('@bob'); return false;">View User</a></small>
+                </div>
+                <div class="alert alert-success">
+                    <strong>Reconciliation Complete</strong><br>
+                    Daily reconciliation passed (Jan 15, 2025) • All balances match<br>
+                    <small style="color: #888;">2 hours ago</small>
+                </div>
+                <div class="alert alert-info">
+                    <strong>KYC Pending Review</strong><br>
+                    5 new KYC applications awaiting manual review<br>
+                    <small style="color: #888;">1 hour ago • <a href="#" onclick="showPage('kyc'); return false;">Review Now</a></small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Transaction Volume (Last 7 Days)</h3>
+                </div>
+                <div class="chart-placeholder">
+                    📊 Chart: Transaction volume trend (production would show actual chart)
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Page -->
+        <div id="page-users" class="page">
+            <div class="header">
+                <div>
+                    <h2>User Management</h2>
+                    <p style="color: #888; margin-top: 4px;">Search and manage user accounts</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">Export Users</button>
+                    <button class="btn btn-primary" onclick="showModal('create-user-modal')">Create User</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Search by @handle, email, phone, or wallet ID..." id="user-search">
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>KYC Level</th>
+                            <th>Balance</th>
+                            <th>Transactions</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr onclick="showUserDetail('@jane')">
+                            <td>
+                                <div style="font-weight: 600;">@jane</div>
+                                <div style="font-size: 12px; color: #888;">Jane Doe • jane@example.com</div>
+                            </td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td><span class="badge badge-info">Level 2 ✓</span></td>
+                            <td style="font-weight: 600;">$1,234.56</td>
+                            <td>127</td>
+                            <td>Jan 10, 2025</td>
+                            <td>
+                                <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); showUserDetail('@jane')">View</button>
+                            </td>
+                        </tr>
+                        <tr onclick="showUserDetail('@bob')">
+                            <td>
+                                <div style="font-weight: 600;">@bob</div>
+                                <div style="font-size: 12px; color: #888;">Bob Smith • bob@example.com</div>
+                            </td>
+                            <td><span class="badge badge-error">Suspended</span></td>
+                            <td><span class="badge badge-info">Level 2 ✓</span></td>
+                            <td style="font-weight: 600;">$45.20</td>
+                            <td>89</td>
+                            <td>Jan 5, 2025</td>
+                            <td>
+                                <button class="btn btn-success btn-small" onclick="event.stopPropagation(); unsuspendUser('@bob')">Unsuspend</button>
+                            </td>
+                        </tr>
+                        <tr onclick="showUserDetail('@emily')">
+                            <td>
+                                <div style="font-weight: 600;">@emily</div>
+                                <div style="font-size: 12px; color: #888;">Emily Chen • emily@example.com</div>
+                            </td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td><span class="badge badge-success">Level 3 ✓</span></td>
+                            <td style="font-weight: 600;">$2,567.89</td>
+                            <td>342</td>
+                            <td>Dec 28, 2024</td>
+                            <td>
+                                <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); showUserDetail('@emily')">View</button>
+                            </td>
+                        </tr>
+                        <tr onclick="showUserDetail('@alice')">
+                            <td>
+                                <div style="font-weight: 600;">@alice</div>
+                                <div style="font-size: 12px; color: #888;">Alice Johnson • alice@example.com</div>
+                            </td>
+                            <td><span class="badge badge-warning">Pending KYC</span></td>
+                            <td><span class="badge badge-warning">Level 1 (Pending)</span></td>
+                            <td style="font-weight: 600;">$0.00</td>
+                            <td>0</td>
+                            <td>Jan 15, 2025</td>
+                            <td>
+                                <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); reviewKYC('alice')">Review KYC</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- KYC Review Page -->
+        <div id="page-kyc" class="page">
+            <div class="header">
+                <div>
+                    <h2>KYC Review Queue</h2>
+                    <p style="color: #888; margin-top: 4px;">Manual verification and document review</p>
+                </div>
+                <div class="header-actions">
+                    <span class="badge badge-warning">5 Pending Review</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('pending-kyc')">Pending (5)</div>
+                    <div class="tab" onclick="switchTab('approved-kyc')">Approved (127)</div>
+                    <div class="tab" onclick="switchTab('rejected-kyc')">Rejected (3)</div>
+                </div>
+
+                <div id="tab-pending-kyc" class="tab-content active">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Submitted</th>
+                                <th>Documents</th>
+                                <th>Risk Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr onclick="reviewKYC('alice')">
+                                <td>
+                                    <div style="font-weight: 600;">@alice</div>
+                                    <div style="font-size: 12px; color: #888;">Alice Johnson</div>
+                                </td>
+                                <td>2 hours ago</td>
+                                <td>
+                                    <span class="badge badge-success">ID ✓</span>
+                                    <span class="badge badge-success">Selfie ✓</span>
+                                    <span class="badge badge-success">Address ✓</span>
+                                </td>
+                                <td><span class="risk-score risk-low">12/100</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); reviewKYC('alice')">Review</button>
+                                </td>
+                            </tr>
+                            <tr onclick="reviewKYC('david')">
+                                <td>
+                                    <div style="font-weight: 600;">@david</div>
+                                    <div style="font-size: 12px; color: #888;">David Lee</div>
+                                </td>
+                                <td>5 hours ago</td>
+                                <td>
+                                    <span class="badge badge-success">ID ✓</span>
+                                    <span class="badge badge-warning">Selfie Blurry</span>
+                                    <span class="badge badge-success">Address ✓</span>
+                                </td>
+                                <td><span class="risk-score risk-medium">45/100</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); reviewKYC('david')">Review</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-approved-kyc" class="tab-content">
+                    <p style="color: #888; padding: 20px; text-align: center;">127 approved KYC applications</p>
+                </div>
+
+                <div id="tab-rejected-kyc" class="tab-content">
+                    <p style="color: #888; padding: 20px; text-align: center;">3 rejected KYC applications</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Page -->
+        <div id="page-transactions" class="page">
+            <div class="header">
+                <div>
+                    <h2>Transaction Investigation</h2>
+                    <p style="color: #888; margin-top: 4px;">Search and analyze all transactions</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">Export</button>
+                    <button class="btn btn-primary">Advanced Filters</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Search by transaction ID, @handle, amount, or date...">
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>From → To</th>
+                            <th>Amount</th>
+                            <th>Route</th>
+                            <th>Status</th>
+                            <th>Risk</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showTransactionDetail('txn_abc123')">
+                            <td><code style="font-size: 12px;">txn_abc123</code></td>
+                            <td>@jane → @emily</td>
+                            <td style="font-weight: 600; color: #34c759;">$100.00</td>
+                            <td><span class="badge badge-info">Same Network</span></td>
+                            <td><span class="badge badge-success">Completed</span></td>
+                            <td><span class="risk-score risk-low">15</span></td>
+                            <td>2 hours ago</td>
+                            <td>
+                                <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); showTransactionDetail('txn_abc123')">Details</button>
+                            </td>
+                        </tr>
+                        <tr onclick="showTransactionDetail('txn_xyz789')">
+                            <td><code style="font-size: 12px;">txn_xyz789</code></td>
+                            <td>@bob → @merchant</td>
+                            <td style="font-weight: 600; color: #ff3b30;">$2,500.00</td>
+                            <td><span class="badge badge-warning">RTP</span></td>
+                            <td><span class="badge badge-error">Blocked</span></td>
+                            <td><span class="risk-score risk-high">92</span></td>
+                            <td>30 min ago</td>
+                            <td>
+                                <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); showTransactionDetail('txn_xyz789')">Review</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Fraud Detection Page -->
+        <div id="page-fraud" class="page">
+            <div class="header">
+                <div>
+                    <h2>Fraud Detection Center</h2>
+                    <p style="color: #888; margin-top: 4px;">Real-time fraud monitoring and rules management</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">0.03%</div>
+                    <div class="stat-label">Fraud Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">17</div>
+                    <div class="stat-label">Blocked (24h)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">Challenged</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$12.4K</div>
+                    <div class="stat-label">Amount Saved</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Flagged Transactions</h3>
+                    <button class="btn btn-secondary btn-small">View All</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Transaction</th>
+                            <th>Risk Score</th>
+                            <th>Flags</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">@bob → @external_xyz</div>
+                                <div style="font-size: 12px; color: #888;">$2,500 • 30 min ago</div>
+                            </td>
+                            <td><span class="risk-score risk-high">92/100</span></td>
+                            <td>
+                                <div style="font-size: 12px;">Unusual amount, New recipient, High velocity</div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger btn-small">Block</button>
+                                    <button class="btn btn-success btn-small">Approve</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Fraud Rules</h3>
+                    <button class="btn btn-primary btn-small" onclick="showModal('add-rule-modal')">Add Rule</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rule Name</th>
+                            <th>Condition</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>High Velocity Check</td>
+                            <td>More than 10 txns in 1 hour</td>
+                            <td><span class="badge badge-error">Block</span></td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Large Amount Alert</td>
+                            <td>Single transaction > $1,000</td>
+                            <td><span class="badge badge-warning">Challenge (2FA)</span></td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>New Recipient Check</td>
+                            <td>First transaction to recipient > $500</td>
+                            <td><span class="badge badge-warning">Challenge</span></td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reconciliation Page -->
+        <div id="page-reconciliation" class="page">
+            <div class="header">
+                <div>
+                    <h2>Reconciliation Dashboard</h2>
+                    <p style="color: #888; margin-top: 4px;">Daily balance reconciliation and matching</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">Run Manual Recon</button>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✓ Daily Reconciliation Passed</strong><br>
+                Last run: Jan 15, 2025 at 02:00 UTC • All balances match
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Blnk ↔ Banking Provider</h3>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Blnk Total Balance (USD)</span>
+                    <span class="metric-value">$10,234,567.89</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">FBO Account Balance</span>
+                    <span class="metric-value">$10,234,567.89</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Difference</span>
+                    <span class="metric-value" style="color: #34c759;">$0.00 ✓ MATCH</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Blnk ↔ Trice.co RTP</h3>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Blnk RTP Transactions (24h)</span>
+                    <span class="metric-value">1,157</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Trice.co RTP Transactions (24h)</span>
+                    <span class="metric-value">1,157</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Match Rate</span>
+                    <span class="metric-value" style="color: #34c759;">100% ✓</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div id="page-reports" class="page">
+            <div class="header">
+                <h2>Reports & Analytics</h2>
+            </div>
+            <div class="card">
+                <p style="color: #888; text-align: center; padding: 40px;">
+                    📊 Advanced analytics and reporting dashboard coming soon
+                </p>
+            </div>
+        </div>
+
+        <!-- System Config Page -->
+        <div id="page-system" class="page">
+            <div class="header">
+                <h2>System Configuration</h2>
+            </div>
+            <div class="card">
+                <p style="color: #888; text-align: center; padding: 40px;">
+                    ⚙️ System configuration panel coming soon
+                </p>
+            </div>
+        </div>
+
+        <!-- Audit Logs Page -->
+        <div id="page-audit" class="page">
+            <div class="header">
+                <h2>Audit Logs</h2>
+            </div>
+            <div class="card">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Search audit logs...">
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Admin User</th>
+                            <th>Action</th>
+                            <th>Target</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025-01-15 14:30:15</td>
+                            <td>admin@titan.com</td>
+                            <td><span class="badge badge-warning">Suspend User</span></td>
+                            <td>@bob</td>
+                            <td>Reason: High velocity</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-15 10:15:42</td>
+                            <td>support@titan.com</td>
+                            <td><span class="badge badge-success">Approve KYC</span></td>
+                            <td>@emily</td>
+                            <td>Level 2 → Level 3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="user-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">User Details: <span id="modal-user-handle"></span></h3>
+                <button class="close-btn" onclick="closeModal('user-detail-modal')">×</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchModalTab('user-info')">Info</div>
+                <div class="tab" onclick="switchModalTab('user-txns')">Transactions</div>
+                <div class="tab" onclick="switchModalTab('user-kyc')">KYC</div>
+                <div class="tab" onclick="switchModalTab('user-activity')">Activity</div>
+            </div>
+
+            <div id="modal-tab-user-info" class="tab-content active">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" value="Jane Doe" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="text" class="form-input" value="jane@example.com" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" class="form-input" value="+1 (555) 123-4567" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Wallet ID</label>
+                    <input type="text" class="form-input" value="wal_001" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Balance ID (Blnk)</label>
+                    <input type="text" class="form-input" value="bal_001" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Trice Virtual Account</label>
+                    <input type="text" class="form-input" value="TRICE_VA_001" readonly>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-danger">Suspend Account</button>
+                    <button class="btn btn-secondary">Reset Password</button>
+                    <button class="btn btn-secondary">View Audit Log</button>
+                </div>
+            </div>
+
+            <div id="modal-tab-user-txns" class="tab-content">
+                <p style="color: #888;">Recent transactions for this user...</p>
+            </div>
+
+            <div id="modal-tab-user-kyc" class="tab-content">
+                <p style="color: #888;">KYC documents and verification status...</p>
+            </div>
+
+            <div id="modal-tab-user-activity" class="tab-content">
+                <p style="color: #888;">User activity log...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- KYC Review Modal -->
+    <div id="kyc-review-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">KYC Review: <span id="kyc-user-handle"></span></h3>
+                <button class="close-btn" onclick="closeModal('kyc-review-modal')">×</button>
+            </div>
+
+            <div class="alert alert-info">
+                Submitted: 2 hours ago • Risk Score: <span class="risk-score risk-low">12/100</span>
+            </div>
+
+            <h4 style="margin: 20px 0 12px 0;">Submitted Documents</h4>
+            <div class="document-grid">
+                <div class="document-card">
+                    <div class="document-icon">🪪</div>
+                    <div class="document-name">Driver's License</div>
+                    <div class="document-status" style="color: #34c759;">✓ Verified</div>
+                </div>
+                <div class="document-card">
+                    <div class="document-icon">🤳</div>
+                    <div class="document-name">Selfie (Liveness)</div>
+                    <div class="document-status" style="color: #34c759;">✓ Verified</div>
+                </div>
+                <div class="document-card">
+                    <div class="document-icon">📄</div>
+                    <div class="document-name">Proof of Address</div>
+                    <div class="document-status" style="color: #34c759;">✓ Verified</div>
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 12px 0;">Extracted Information</h4>
+            <div class="metric-row">
+                <span class="metric-label">Full Name</span>
+                <span class="metric-value">Alice Johnson</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Date of Birth</span>
+                <span class="metric-value">March 15, 1992</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">SSN (Last 4)</span>
+                <span class="metric-value">••••1234</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Address</span>
+                <span class="metric-value">123 Main St, San Francisco, CA 94102</span>
+            </div>
+
+            <h4 style="margin: 20px 0 12px 0;">Verification Checks</h4>
+            <div class="metric-row">
+                <span class="metric-label">Document Authenticity</span>
+                <span class="metric-value" style="color: #34c759;">✓ Passed</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Liveness Detection</span>
+                <span class="metric-value" style="color: #34c759;">✓ Passed</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Face Match</span>
+                <span class="metric-value" style="color: #34c759;">✓ 98% Match</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">AML Screening</span>
+                <span class="metric-value" style="color: #34c759;">✓ No Hits</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Sanctions Check</span>
+                <span class="metric-value" style="color: #34c759;">✓ Clear</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Review Notes</label>
+                <textarea class="form-input" placeholder="Add notes about this KYC review..."></textarea>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="approveKYC()">✓ Approve (Level 2)</button>
+                <button class="btn btn-danger" onclick="rejectKYC()">✗ Reject</button>
+                <button class="btn btn-secondary" onclick="requestMoreDocs()">Request More Docs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Detail Modal -->
+    <div id="transaction-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Transaction Details</h3>
+                <button class="close-btn" onclick="closeModal('transaction-detail-modal')">×</button>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">Transaction ID</span>
+                <span class="metric-value"><code>txn_abc123</code></span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">From</span>
+                <span class="metric-value">@jane (wal_001)</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">To</span>
+                <span class="metric-value">@emily (wal_002)</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Amount</span>
+                <span class="metric-value" style="color: #34c759;">$100.00 USD</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Route</span>
+                <span class="metric-value"><span class="badge badge-info">Same Network</span></span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Status</span>
+                <span class="metric-value"><span class="badge badge-success">Completed</span></span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Risk Score</span>
+                <span class="metric-value"><span class="risk-score risk-low">15/100</span></span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">HRS Resolution Time</span>
+                <span class="metric-value">8ms</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Blnk Transaction ID</span>
+                <span class="metric-value"><code>blnk_txn_001</code></span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Timestamp</span>
+                <span class="metric-value">2025-01-15 10:30:00 UTC</span>
+            </div>
+
+            <div class="action-buttons" style="margin-top: 24px;">
+                <button class="btn btn-danger">Reverse Transaction</button>
+                <button class="btn btn-secondary">Add Note</button>
+                <button class="btn btn-secondary">Export Details</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Tabs
+        function switchTab(tabName) {
+            const parent = event.target.closest('.card');
+            parent.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            parent.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            parent.querySelector('#tab-' + tabName).classList.add('active');
+        }
+
+        function switchModalTab(tabName) {
+            const modal = event.target.closest('.modal-content');
+            modal.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            modal.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            modal.querySelector('#modal-tab-' + tabName).classList.add('active');
+        }
+
+        // Modals
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // User Actions
+        function showUserDetail(handle) {
+            document.getElementById('modal-user-handle').textContent = handle;
+            showModal('user-detail-modal');
+        }
+
+        function unsuspendUser(handle) {
+            if (confirm(`Unsuspend user ${handle}?`)) {
+                alert(`User ${handle} has been unsuspended`);
+                location.reload();
+            }
+        }
+
+        function reviewKYC(username) {
+            document.getElementById('kyc-user-handle').textContent = '@' + username;
+            showModal('kyc-review-modal');
+        }
+
+        function approveKYC() {
+            alert('KYC Approved! User upgraded to Level 2');
+            closeModal('kyc-review-modal');
+        }
+
+        function rejectKYC() {
+            const reason = prompt('Rejection reason:');
+            if (reason) {
+                alert('KYC Rejected: ' + reason);
+                closeModal('kyc-review-modal');
+            }
+        }
+
+        function requestMoreDocs() {
+            alert('Document request sent to user');
+            closeModal('kyc-review-modal');
+        }
+
+        function showTransactionDetail(txnId) {
+            showModal('transaction-detail-modal');
+        }
+    </script>
+</body>
+</html>

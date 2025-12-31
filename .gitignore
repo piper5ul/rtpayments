@@ -8,6 +8,9 @@ admin-dashboard/
 api-contracts/
 external_repos/
 
+# Local Docker overrides
+docker-compose.override.yml
+
 # Mac
 .DS_Store
 

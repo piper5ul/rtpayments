@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Wallet - Consumer App (Enhanced)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .device-frame {
+            width: 390px;
+            height: 844px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .device-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+            height: calc(100% - 44px);
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 12px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .balance-secondary {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .wallet-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .wallet-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .wallet-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .wallet-btn.added {
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            border-color: rgba(255,255,255,0.9);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f5f7;
+            color: #333;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .action-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .document-upload {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 16px;
+        }
+
+        .document-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .document-upload.uploaded {
+            border-color: #34c759;
+            background: rgba(52, 199, 89, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .upload-subtext {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .verification-steps {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .step {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .step-number {
+            position: absolute;
+            left: -40px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .step.completed .step-number {
+            background: #34c759;
+            color: white;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .badge-success {
+            background: #e5f5e5;
+            color: #34c759;
+        }
+
+        .badge-pending {
+            background: #fff5e5;
+            color: #ff9500;
+        }
+
+        .badge-error {
+            background: #ffe5e5;
+            color: #ff3b30;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 24px 0;
+            z-index: 10;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #888;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .alert-info {
+            background: #e5f0ff;
+            border-left: 4px solid #007aff;
+            color: #004085;
+        }
+
+        .alert-success {
+            background: #e5f5e5;
+            border-left: 4px solid #34c759;
+            color: #1a7a2e;
+        }
+
+        .alert-warning {
+            background: #fff5e5;
+            border-left: 4px solid #ff9500;
+            color: #8b5a00;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .success-checkmark circle {
+            stroke: #34c759;
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .success-checkmark path {
+            stroke: #34c759;
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+        }
+
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .card-visual {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .card-number {
+            font-size: 20px;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="device-frame">
+        <div class="screen">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>Titan Wallet</span>
+                <span>100%</span>
+            </div>
+
+            <!-- Home Page with Digital Wallet Integration -->
+            <div id="page-home" class="page active">
+                <div class="balance-card">
+                    <div class="balance-label">Available Balance</div>
+                    <div class="balance-amount">$1,234.56</div>
+                    <div class="balance-secondary">
+                        Pending: <span>$50.00</span>
+                    </div>
+                    <div class="wallet-buttons">
+                        <button class="wallet-btn" id="apple-wallet-btn" onclick="addToAppleWallet()">
+                            <span>🍎</span>
+                            <span>Add to Apple Wallet</span>
+                        </button>
+                        <button class="wallet-btn" id="google-wallet-btn" onclick="addToGoogleWallet()">
+                            <span>G</span>
+                            <span>Add to Google Pay</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="content" style="padding-bottom: 100px;">
+                    <div class="action-grid">
+                        <div class="action-btn" onclick="showPage('page-send')">
+                            <div class="action-icon">↗️</div>
+                            <div class="action-label">Send</div>
+                        </div>
+                        <div class="action-btn" onclick="showPage('page-request')">
+                            <div class="action-icon">↙️</div>
+                            <div class="action-label">Request</div>
+                        </div>
+                        <div class="action-btn" onclick="showPage('page-add-money')">
+                            <div class="action-icon">➕</div>
+                            <div class="action-label">Add Money</div>
+                        </div>
+                        <div class="action-btn" onclick="showPage('page-cards')">
+                            <div class="action-icon">💳</div>
+                            <div class="action-label">My Cards</div>
+                        </div>
+                    </div>
+                    <h3 style="margin-bottom: 12px;">Recent Transactions</h3>
+                    <div id="transactions-list">
+                        <!-- Transactions populated by JS -->
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item active">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-activity')">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-cards')">
+                        <div class="nav-icon">💳</div>
+                        <div class="nav-label">Cards</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced KYC Flow -->
+            <div id="page-kyc-enhanced" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Identity Verification</h1>
+                    <p>KYC Level 2 Upgrade</p>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">
+                        <strong>Why verify?</strong><br>
+                        Increase your limits and unlock additional features by completing Level 2 verification.
+                    </div>
+
+                    <div class="verification-steps">
+                        <div class="step completed">
+                            <div class="step-number">✓</div>
+                            <div class="step-title">Basic Info</div>
+                            <div class="step-desc">Name, email, phone verified</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-title">ID Document</div>
+                            <div class="step-desc">Upload government-issued ID</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-title">Liveness Check</div>
+                            <div class="step-desc">Take a selfie video</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-title">Proof of Address</div>
+                            <div class="step-desc">Upload utility bill or bank statement</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 24px 0 12px 0;">Upload ID Document</h3>
+                    <div class="document-upload" id="id-front-upload" onclick="uploadDocument('id-front')">
+                        <div class="upload-icon">🪪</div>
+                        <div class="upload-text">ID Front</div>
+                        <div class="upload-subtext">Tap to upload or take photo</div>
+                    </div>
+
+                    <div class="document-upload" id="id-back-upload" onclick="uploadDocument('id-back')">
+                        <div class="upload-icon">🪪</div>
+                        <div class="upload-text">ID Back</div>
+                        <div class="upload-subtext">Tap to upload or take photo</div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="startLivenessCheck()">Continue to Liveness Check</button>
+                </div>
+            </div>
+
+            <!-- Liveness Check -->
+            <div id="page-liveness" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-kyc-enhanced')">←</button>
+                    <h1>Liveness Check</h1>
+                    <p>Verify it's really you</p>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">
+                        <strong>Instructions:</strong><br>
+                        We'll ask you to perform simple actions like smiling or turning your head to verify you're a real person.
+                    </div>
+
+                    <div class="card" style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🤳</div>
+                        <h3 style="margin-bottom: 12px;">Position Your Face</h3>
+                        <p style="color: #666; margin-bottom: 24px;">
+                            Center your face in the circle and follow the on-screen instructions
+                        </p>
+                        <div style="width: 200px; height: 200px; border: 3px dashed #667eea; border-radius: 50%; margin: 20px auto; display: flex; align-items: center; justify-content: center;">
+                            <div style="font-size: 80px; opacity: 0.3;">👤</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="simulateLivenessCheck()">Start Liveness Check</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Cards -->
+            <div id="page-cards" class="page">
+                <div class="page-header">
+                    <h1>My Cards</h1>
+                    <p>Virtual and physical cards</p>
+                </div>
+                <div class="content" style="padding-bottom: 100px;">
+                    <div class="card-visual">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+                            <div style="font-size: 18px; font-weight: 700;">TITAN</div>
+                            <div style="font-size: 24px;">💳</div>
+                        </div>
+                        <div class="card-number">•••• •••• •••• 4521</div>
+                        <div class="card-info">
+                            <div>
+                                <div style="opacity: 0.7; margin-bottom: 4px;">CARDHOLDER</div>
+                                <div>JANE DOE</div>
+                            </div>
+                            <div>
+                                <div style="opacity: 0.7; margin-bottom: 4px;">EXPIRES</div>
+                                <div>12/28</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wallet-buttons" style="margin-bottom: 20px;">
+                        <button class="wallet-btn" onclick="showAppleWalletDetails()">
+                            <span>🍎</span>
+                            <span id="apple-wallet-text">Add to Apple Wallet</span>
+                        </button>
+                    </div>
+
+                    <div class="wallet-buttons" style="margin-bottom: 20px;">
+                        <button class="wallet-btn" onclick="showGoogleWalletDetails()">
+                            <span style="background: white; color: #4285f4; width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700;">G</span>
+                            <span id="google-wallet-text">Add to Google Pay</span>
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;">Card Settings</h3>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <span>Card Status</span>
+                            <span style="color: #34c759; font-weight: 600;">Active</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <span>Contactless Payments</span>
+                            <span style="color: #34c759; font-weight: 600;">Enabled</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0;">
+                            <span>Online Payments</span>
+                            <span style="color: #34c759; font-weight: 600;">Enabled</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;">Card Actions</h3>
+                        <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="alert('View card number and CVV')">View Card Details</button>
+                        <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="alert('Freeze card')">Freeze Card</button>
+                        <button class="btn btn-secondary" onclick="alert('Report card lost or stolen')">Report Lost/Stolen</button>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item" onclick="showPage('page-home')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-activity')">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item active">
+                        <div class="nav-icon">💳</div>
+                        <div class="nav-label">Cards</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request Money -->
+            <div id="page-request" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Request Money</h1>
+                    <p>Request payment from anyone</p>
+                </div>
+                <div class="content">
+                    <div class="input-group">
+                        <label class="input-label">From</label>
+                        <input type="text" class="input-field" placeholder="@handle or phone number" id="request-from">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Amount</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 14px; top: 14px; font-size: 16px; color: #888;">$</span>
+                            <input type="number" class="input-field" placeholder="0.00" id="request-amount" style="padding-left: 32px;">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">What's this for?</label>
+                        <input type="text" class="input-field" placeholder="Dinner, rent, etc." id="request-note">
+                    </div>
+                    <button class="btn btn-primary" onclick="createPaymentRequest()">Create Request</button>
+                </div>
+            </div>
+
+            <!-- Settings with Enhanced Features -->
+            <div id="page-settings" class="page">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                    <p>Manage your account</p>
+                </div>
+                <div class="content" style="padding-bottom: 100px;">
+                    <div class="card">
+                        <div style="text-align: center; padding: 20px 0;">
+                            <div style="font-size: 64px; margin-bottom: 12px;">👤</div>
+                            <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">Jane Doe</div>
+                            <div style="font-size: 16px; color: #667eea;">@jane</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4 style="margin-bottom: 16px;">Account</h4>
+                        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer;" onclick="showPage('page-kyc-enhanced')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>KYC Status</span>
+                                <span style="color: #ff9500;">Level 1 (Upgrade) →</span>
+                            </div>
+                        </div>
+                        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Linked Banks</span>
+                                <span style="color: #888;">1 account →</span>
+                            </div>
+                        </div>
+                        <div style="padding: 12px 0; cursor: pointer;" onclick="showPage('page-cards')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>My Cards</span>
+                                <span style="color: #888;">→</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4 style="margin-bottom: 16px;">Security</h4>
+                        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer;" onclick="alert('Biometric authentication settings')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Face ID / Touch ID</span>
+                                <span style="color: #34c759;">Enabled ✓</span>
+                            </div>
+                        </div>
+                        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer;" onclick="alert('Two-factor authentication settings')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Two-Factor Auth (2FA)</span>
+                                <span style="color: #ff9500;">Setup →</span>
+                            </div>
+                        </div>
+                        <div style="padding: 12px 0; cursor: pointer;" onclick="alert('Change PIN')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Change PIN</span>
+                                <span style="color: #888;">→</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4 style="margin-bottom: 16px;">Notifications</h4>
+                        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Payment Alerts</span>
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" checked style="width: 20px; height: 20px;">
+                                </label>
+                            </div>
+                        </div>
+                        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Security Alerts</span>
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" checked style="width: 20px; height: 20px;">
+                                </label>
+                            </div>
+                        </div>
+                        <div style="padding: 12px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Marketing Updates</span>
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" style="width: 20px; height: 20px;">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item" onclick="showPage('page-home')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-activity')">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-cards')">
+                        <div class="nav-icon">💳</div>
+                        <div class="nav-label">Cards</div>
+                    </div>
+                    <div class="nav-item active">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder pages -->
+            <div id="page-send" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Send Money</h1>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">This is the existing send money flow from the main prototype</div>
+                </div>
+            </div>
+
+            <div id="page-add-money" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Add Money</h1>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">This is the existing ACH pull flow from the main prototype</div>
+                </div>
+            </div>
+
+            <div id="page-activity" class="page">
+                <div class="page-header">
+                    <h1>Activity</h1>
+                </div>
+                <div class="content" style="padding-bottom: 100px;">
+                    <div class="alert alert-info">Transaction history from main prototype</div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item" onclick="showPage('page-home')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item active">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-cards')">
+                        <div class="nav-icon">💳</div>
+                        <div class="nav-label">Cards</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div id="loading-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <svg class="success-checkmark" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="25"/>
+                <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <div class="modal-title" id="success-title">Success!</div>
+            <div class="modal-text" id="success-text">Action completed successfully.</div>
+            <button class="btn btn-primary" onclick="closeModal('success-modal')">Done</button>
+        </div>
+    </div>
+
+    <script>
+        const appState = {
+            appleWalletAdded: false,
+            googleWalletAdded: false,
+            kycDocuments: {
+                idFront: false,
+                idBack: false,
+                selfie: false,
+                address: false
+            }
+        };
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Apple Wallet Integration
+        function addToAppleWallet() {
+            showLoading('Provisioning card to Apple Wallet...');
+            setTimeout(() => {
+                hideLoading();
+                appState.appleWalletAdded = true;
+                document.getElementById('apple-wallet-btn').classList.add('added');
+                document.getElementById('apple-wallet-btn').innerHTML = '<span>✓</span><span>Added to Apple Wallet</span>';
+                document.getElementById('apple-wallet-text').textContent = 'Added to Apple Wallet ✓';
+                showSuccess('Added to Apple Wallet!', 'Your Titan card is now available in Apple Wallet. Tap your iPhone to pay anywhere Apple Pay is accepted.');
+            }, 2000);
+        }
+
+        function showAppleWalletDetails() {
+            if (appState.appleWalletAdded) {
+                alert('✓ Card is in Apple Wallet\n\nUse your iPhone or Apple Watch to make contactless payments anywhere Apple Pay is accepted.');
+            } else {
+                addToAppleWallet();
+            }
+        }
+
+        // Google Wallet Integration
+        function addToGoogleWallet() {
+            showLoading('Adding card to Google Wallet...');
+            setTimeout(() => {
+                hideLoading();
+                appState.googleWalletAdded = true;
+                document.getElementById('google-wallet-btn').classList.add('added');
+                document.getElementById('google-wallet-btn').innerHTML = '<span>✓</span><span>Added to Google Pay</span>';
+                document.getElementById('google-wallet-text').textContent = 'Added to Google Pay ✓';
+                showSuccess('Added to Google Pay!', 'Your Titan card is now available in Google Wallet. Tap your Android phone to pay anywhere Google Pay is accepted.');
+            }, 2000);
+        }
+
+        function showGoogleWalletDetails() {
+            if (appState.googleWalletAdded) {
+                alert('✓ Card is in Google Wallet\n\nUse your Android phone or Wear OS watch to make contactless payments anywhere Google Pay is accepted.');
+            } else {
+                addToGoogleWallet();
+            }
+        }
+
+        // KYC Document Upload
+        function uploadDocument(docType) {
+            showLoading('Uploading document...');
+            setTimeout(() => {
+                hideLoading();
+                const uploadElement = document.getElementById(docType + '-upload');
+                uploadElement.classList.add('uploaded');
+                uploadElement.querySelector('.upload-icon').textContent = '✓';
+                uploadElement.querySelector('.upload-text').textContent = 'Uploaded';
+                uploadElement.querySelector('.upload-subtext').textContent = 'Tap to replace';
+                appState.kycDocuments[docType.replace('-', '')] = true;
+                showSuccess('Document Uploaded', 'Your document has been uploaded and is being verified.');
+            }, 1500);
+        }
+
+        // Liveness Check
+        function startLivenessCheck() {
+            showPage('page-liveness');
+        }
+
+        function simulateLivenessCheck() {
+            showLoading('Performing liveness check...');
+            setTimeout(() => {
+                showLoading('Please smile...');
+            }, 1000);
+            setTimeout(() => {
+                showLoading('Please turn your head left...');
+            }, 2500);
+            setTimeout(() => {
+                showLoading('Please turn your head right...');
+            }, 4000);
+            setTimeout(() => {
+                hideLoading();
+                appState.kycDocuments.selfie = true;
+                showSuccess('Liveness Check Complete!', 'Your identity has been verified. Upload proof of address to complete KYC Level 2.');
+                setTimeout(() => {
+                    closeModal('success-modal');
+                    showPage('page-kyc-enhanced');
+                }, 3000);
+            }, 5500);
+        }
+
+        // Payment Request
+        function createPaymentRequest() {
+            const from = document.getElementById('request-from').value;
+            const amount = document.getElementById('request-amount').value;
+            const note = document.getElementById('request-note').value;
+
+            if (!from || !amount) {
+                alert('Please enter recipient and amount');
+                return;
+            }
+
+            showLoading('Creating payment request...');
+            setTimeout(() => {
+                hideLoading();
+                const link = `titan://pay/@jane/${amount}?note=${encodeURIComponent(note)}`;
+                showSuccess('Payment Request Created!', `Payment request link created. Share with ${from} to receive $${amount}.`);
+            }, 1500);
+        }
+
+        // UI Helpers
+        function showLoading(text) {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-overlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.remove('active');
+        }
+
+        function showSuccess(title, text) {
+            document.getElementById('success-title').textContent = title;
+            document.getElementById('success-text').textContent = text;
+            document.getElementById('success-modal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+    </script>
+</body>
+</html>

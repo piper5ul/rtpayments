@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Wallet - Interactive Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .device-frame {
+            width: 390px;
+            height: 844px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .device-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+            height: calc(100% - 44px);
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .balance-secondary {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f5f7;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .action-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .transaction-list {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .transaction-item:hover {
+            background: #f9f9fb;
+            transform: translateX(4px);
+        }
+
+        .transaction-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+        }
+
+        .transaction-icon.sent {
+            background: #ffe5e5;
+        }
+
+        .transaction-icon.received {
+            background: #e5f5e5;
+        }
+
+        .transaction-icon.pending {
+            background: #fff5e5;
+        }
+
+        .transaction-details {
+            flex: 1;
+        }
+
+        .transaction-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .transaction-subtitle {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .transaction-amount.positive {
+            color: #34c759;
+        }
+
+        .transaction-amount.negative {
+            color: #ff3b30;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .badge-success {
+            background: #e5f5e5;
+            color: #34c759;
+        }
+
+        .badge-pending {
+            background: #fff5e5;
+            color: #ff9500;
+        }
+
+        .badge-error {
+            background: #ffe5e5;
+            color: #ff3b30;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .success-checkmark circle {
+            stroke: #34c759;
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .success-checkmark path {
+            stroke: #34c759;
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+        }
+
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 16px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 24px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 12px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .admin-dashboard {
+            background: #f5f5f7;
+        }
+
+        .admin-header {
+            background: #1d1d1f;
+            color: white;
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-row {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .table-row:hover {
+            background: #f9f9fb;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .alert-warning {
+            background: #fff5e5;
+            border-left: 4px solid #ff9500;
+        }
+
+        .alert-error {
+            background: #ffe5e5;
+            border-left: 4px solid #ff3b30;
+        }
+
+        .alert-success {
+            background: #e5f5e5;
+            border-left: 4px solid #34c759;
+        }
+
+        .alert-info {
+            background: #e5f0ff;
+            border-left: 4px solid #007aff;
+        }
+    </style>
+</head>
+<body>
+    <div class="device-frame">
+        <div class="screen">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>Titan Wallet</span>
+                <span>100%</span>
+            </div>
+
+            <!-- Welcome / Login Page -->
+            <div id="page-welcome" class="page active">
+                <div class="page-header" style="height: 40%;">
+                    <div style="padding-top: 60px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">💳</div>
+                        <h1>Titan Wallet</h1>
+                        <p>Real-time payments, simplified</p>
+                    </div>
+                </div>
+                <div class="content">
+                    <button class="btn btn-primary" onclick="showPage('page-signup')" style="margin-bottom: 12px;">Get Started</button>
+                    <button class="btn btn-secondary" onclick="showPage('page-home')">Sign In</button>
+                    <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #888;">
+                        Demo Mode: Explore all flows
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sign Up Flow -->
+            <div id="page-signup" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-welcome')">←</button>
+                    <h1>Create Account</h1>
+                    <p>Join the future of payments</p>
+                </div>
+                <div class="content">
+                    <div class="input-group">
+                        <label class="input-label">Full Name</label>
+                        <input type="text" class="input-field" placeholder="Jane Doe" id="signup-name">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Email</label>
+                        <input type="email" class="input-field" placeholder="jane@example.com" id="signup-email">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Phone Number</label>
+                        <input type="tel" class="input-field" placeholder="+1 (555) 123-4567" id="signup-phone">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <input type="password" class="input-field" placeholder="••••••••" id="signup-password">
+                    </div>
+                    <button class="btn btn-primary" onclick="startKYC()">Continue</button>
+                </div>
+            </div>
+
+            <!-- KYC Verification -->
+            <div id="page-kyc" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-signup')">←</button>
+                    <h1>Verify Identity</h1>
+                    <p>Required for regulatory compliance</p>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">
+                        <strong>Why KYC?</strong><br>
+                        We're required to verify your identity for financial services compliance (KYC/AML).
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;">Personal Information</h3>
+                        <div class="input-group">
+                            <label class="input-label">Social Security Number</label>
+                            <input type="text" class="input-field" placeholder="XXX-XX-1234">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Date of Birth</label>
+                            <input type="date" class="input-field">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Address</label>
+                            <input type="text" class="input-field" placeholder="123 Main St, City, ST 12345">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="completeKYC()">Submit for Verification</button>
+                </div>
+            </div>
+
+            <!-- Create Handle -->
+            <div id="page-create-handle" class="page">
+                <div class="page-header">
+                    <h1>Choose Your @Handle</h1>
+                    <p>Your unique payment identifier</p>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">
+                        Your @handle is how people will send you money. Choose wisely!
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">@Handle</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 14px; top: 14px; font-size: 16px; color: #888;">@</span>
+                            <input type="text" class="input-field" placeholder="yourname" id="handle-input" style="padding-left: 32px;" oninput="checkHandle()">
+                        </div>
+                        <div id="handle-status" style="margin-top: 8px; font-size: 14px;"></div>
+                    </div>
+                    <div class="card">
+                        <h4 style="margin-bottom: 12px;">Handle Rules</h4>
+                        <ul style="font-size: 14px; color: #666; padding-left: 20px;">
+                            <li>3-20 characters</li>
+                            <li>Letters, numbers, and underscores only</li>
+                            <li>Must be unique</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" onclick="showPage('page-link-bank')">Continue</button>
+                </div>
+            </div>
+
+            <!-- Link Bank Account (Plaid) -->
+            <div id="page-link-bank" class="page">
+                <div class="page-header">
+                    <h1>Link Bank Account</h1>
+                    <p>Connect your bank to add funds</p>
+                </div>
+                <div class="content">
+                    <div class="alert alert-info">
+                        <strong>Secure Connection</strong><br>
+                        We use Plaid for secure bank linking. Your credentials are never stored.
+                    </div>
+                    <div class="card" style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🏦</div>
+                        <h3 style="margin-bottom: 12px;">Connect Your Bank</h3>
+                        <p style="color: #666; margin-bottom: 24px;">
+                            Link your bank account to fund your Titan Wallet via ACH
+                        </p>
+                        <button class="btn btn-primary" onclick="simulatePlaidLink()">Connect with Plaid</button>
+                    </div>
+                    <button class="btn btn-secondary" onclick="completeOnboarding()">Skip for Now</button>
+                </div>
+            </div>
+
+            <!-- Home / Dashboard -->
+            <div id="page-home" class="page">
+                <div class="balance-card">
+                    <div class="balance-label">Available Balance</div>
+                    <div class="balance-amount" id="balance-available">$1,234.56</div>
+                    <div class="balance-secondary">
+                        Pending: <span id="balance-pending">$50.00</span>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="action-grid">
+                        <div class="action-btn" onclick="showPage('page-send')">
+                            <div class="action-icon">↗️</div>
+                            <div class="action-label">Send</div>
+                        </div>
+                        <div class="action-btn" onclick="showPage('page-request')">
+                            <div class="action-icon">↙️</div>
+                            <div class="action-label">Request</div>
+                        </div>
+                        <div class="action-btn" onclick="showPage('page-add-money')">
+                            <div class="action-icon">➕</div>
+                            <div class="action-label">Add Money</div>
+                        </div>
+                        <div class="action-btn" onclick="showPage('page-scan-qr')">
+                            <div class="action-icon">📱</div>
+                            <div class="action-label">Scan QR</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 12px;">Recent Transactions</h3>
+                    <div class="transaction-list" id="transaction-list">
+                        <!-- Transactions will be populated by JS -->
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item active" onclick="showPage('page-home')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-activity')">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Send Money -->
+            <div id="page-send" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Send Money</h1>
+                    <p>Pay anyone with their @handle</p>
+                </div>
+                <div class="content">
+                    <div class="input-group">
+                        <label class="input-label">Recipient</label>
+                        <input type="text" class="input-field" placeholder="@emily" id="send-recipient">
+                        <div id="recipient-status" style="margin-top: 8px; font-size: 14px;"></div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Amount</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 14px; top: 14px; font-size: 16px; color: #888;">$</span>
+                            <input type="number" class="input-field" placeholder="0.00" id="send-amount" style="padding-left: 32px;">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Note (Optional)</label>
+                        <input type="text" class="input-field" placeholder="What's this for?" id="send-note">
+                    </div>
+                    <button class="btn btn-primary" onclick="initiateSend()">Review Payment</button>
+                </div>
+            </div>
+
+            <!-- Add Money (ACH Pull) -->
+            <div id="page-add-money" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Add Money</h1>
+                    <p>Fund your wallet via ACH</p>
+                </div>
+                <div class="content">
+                    <div class="card">
+                        <h4 style="margin-bottom: 12px;">Linked Bank Account</h4>
+                        <div style="display: flex; align-items: center; padding: 12px; background: #f9f9fb; border-radius: 8px;">
+                            <div style="font-size: 32px; margin-right: 12px;">🏦</div>
+                            <div>
+                                <div style="font-weight: 600;">Chase Checking</div>
+                                <div style="font-size: 14px; color: #888;">••••4521</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Amount to Add</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 14px; top: 14px; font-size: 16px; color: #888;">$</span>
+                            <input type="number" class="input-field" placeholder="0.00" id="ach-amount" style="padding-left: 32px;">
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>Settlement Time</strong><br>
+                        ACH transfers typically take 1-3 business days to complete.
+                    </div>
+                    <button class="btn btn-primary" onclick="initiateACHPull()">Add Money</button>
+                </div>
+            </div>
+
+            <!-- Scan QR Code -->
+            <div id="page-scan-qr" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('page-home')">←</button>
+                    <h1>Scan QR Code</h1>
+                    <p>Pay merchants instantly</p>
+                </div>
+                <div class="content">
+                    <div class="card" style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">📷</div>
+                        <h3 style="margin-bottom: 12px;">Position QR Code</h3>
+                        <p style="color: #666; margin-bottom: 24px;">
+                            Center the merchant's QR code in the frame
+                        </p>
+                        <div style="width: 200px; height: 200px; border: 3px dashed #667eea; border-radius: 16px; margin: 20px auto; display: flex; align-items: center; justify-content: center;">
+                            <div style="font-size: 80px; opacity: 0.3;">⊞</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="simulateQRScan()">Simulate QR Scan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity / Transaction History -->
+            <div id="page-activity" class="page">
+                <div class="page-header">
+                    <h1>Activity</h1>
+                    <p>Your transaction history</p>
+                </div>
+                <div class="content">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                            <div>
+                                <div style="font-size: 14px; color: #888;">Available Balance</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #34c759;">$1,234.56</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #888;">Pending</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #ff9500;">$50.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 style="margin: 20px 0 12px 0;">All Transactions</h3>
+                    <div class="transaction-list" id="activity-list">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item" onclick="showPage('page-home')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item active" onclick="showPage('page-activity')">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div id="page-settings" class="page">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                    <p>Manage your account</p>
+                </div>
+                <div class="content">
+                    <div class="card">
+                        <div style="text-align: center; padding: 20px 0;">
+                            <div style="font-size: 64px; margin-bottom: 12px;">👤</div>
+                            <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">Jane Doe</div>
+                            <div style="font-size: 16px; color: #667eea;">@jane</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4 style="margin-bottom: 16px;">Account</h4>
+                        <div class="table-row" onclick="alert('KYC: Level 2 - Verified')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>KYC Status</span>
+                                <span style="color: #34c759;">✓ Verified</span>
+                            </div>
+                        </div>
+                        <div class="table-row" onclick="showPage('page-link-bank')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Linked Banks</span>
+                                <span style="color: #888;">1 account →</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4 style="margin-bottom: 16px;">Demo Controls</h4>
+                        <div class="table-row" onclick="showPage('page-admin')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Admin Dashboard</span>
+                                <span style="color: #888;">→</span>
+                            </div>
+                        </div>
+                        <div class="table-row" onclick="testErrorFlow('insufficient_balance')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Test: Insufficient Balance</span>
+                                <span style="color: #888;">→</span>
+                            </div>
+                        </div>
+                        <div class="table-row" onclick="testErrorFlow('fraud_block')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Test: Fraud Block</span>
+                                <span style="color: #888;">→</span>
+                            </div>
+                        </div>
+                        <div class="table-row" onclick="testErrorFlow('rtp_timeout')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Test: RTP Timeout</span>
+                                <span style="color: #888;">→</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="nav-item" onclick="showPage('page-home')">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('page-activity')">
+                        <div class="nav-icon">📊</div>
+                        <div class="nav-label">Activity</div>
+                    </div>
+                    <div class="nav-item active" onclick="showPage('page-settings')">
+                        <div class="nav-icon">⚙️</div>
+                        <div class="nav-label">Settings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="page-admin" class="page admin-dashboard">
+                <div class="admin-header">
+                    <button class="back-btn" onclick="showPage('page-settings')">←</button>
+                    <h1>Admin Dashboard</h1>
+                    <p>Operations & Compliance</p>
+                </div>
+                <div class="content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">1,234</div>
+                            <div class="stat-label">Active Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">$2.4M</div>
+                            <div class="stat-label">Total Volume</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">5,678</div>
+                            <div class="stat-label">Transactions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0.03%</div>
+                            <div class="stat-label">Fraud Rate</div>
+                        </div>
+                    </div>
+
+                    <div class="search-box">
+                        <input type="text" class="input-field" placeholder="Search users, transactions..." id="admin-search">
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;">Recent Transactions</h3>
+                        <div class="table">
+                            <div class="table-row" onclick="showTransactionDetail('txn_001')">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="font-weight: 600;">txn_abc123</span>
+                                    <span style="color: #34c759; font-weight: 700;">$100.00</span>
+                                </div>
+                                <div style="font-size: 14px; color: #888;">
+                                    @jane → @emily • Completed
+                                </div>
+                            </div>
+                            <div class="table-row" onclick="showTransactionDetail('txn_002')">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="font-weight: 600;">txn_xyz789</span>
+                                    <span style="color: #ff9500; font-weight: 700;">$50.00</span>
+                                </div>
+                                <div style="font-size: 14px; color: #888;">
+                                    ACH Pull • Pending Settlement
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;">Flagged Activity</h3>
+                        <div class="alert alert-warning">
+                            <strong>High Velocity Alert</strong><br>
+                            User @bob exceeded velocity limit (15 txns/hour)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div id="loading-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <svg class="success-checkmark" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="25"/>
+                <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <div class="modal-title" id="success-title">Success!</div>
+            <div class="modal-text" id="success-text">Your transaction was completed successfully.</div>
+            <button class="btn btn-primary" onclick="closeModal('success-modal')">Done</button>
+        </div>
+    </div>
+
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-title" id="error-title">Error</div>
+            <div class="modal-text" id="error-text">Something went wrong.</div>
+            <button class="btn btn-primary" onclick="closeModal('error-modal')">OK</button>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Confirm Payment</div>
+            <div class="modal-text" id="confirm-text">
+                Send $100.00 to @emily?
+            </div>
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #888; margin-bottom: 8px;">Route</div>
+                <div style="font-weight: 600;" id="confirm-route">Same Network (Instant)</div>
+            </div>
+            <button class="btn btn-primary" onclick="confirmPayment()" style="margin-bottom: 12px;">
+                Confirm with Face ID
+            </button>
+            <button class="btn btn-secondary" onclick="closeModal('confirm-modal')">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const appState = {
+            currentUser: {
+                handle: '@jane',
+                name: 'Jane Doe',
+                balance: 1234.56,
+                pendingBalance: 50.00,
+                walletId: 'wal_001',
+                balanceId: 'bal_001'
+            },
+            transactions: [
+                {
+                    id: 'txn_001',
+                    type: 'sent',
+                    amount: -100.00,
+                    recipient: '@emily',
+                    status: 'completed',
+                    date: '2025-01-15T10:30:00Z',
+                    route: 'same_network'
+                },
+                {
+                    id: 'txn_002',
+                    type: 'received',
+                    amount: 200.00,
+                    sender: '@bob',
+                    status: 'completed',
+                    date: '2025-01-15T09:15:00Z',
+                    route: 'rtp'
+                },
+                {
+                    id: 'txn_003',
+                    type: 'ach_pull',
+                    amount: 50.00,
+                    bank: 'Chase ••••4521',
+                    status: 'pending',
+                    date: '2025-01-15T08:00:00Z',
+                    estimatedSettlement: '2025-01-17'
+                }
+            ],
+            pendingPayment: null
+        };
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+
+            // Update bottom nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Populate transaction lists when showing home or activity
+            if (pageId === 'page-home') {
+                populateTransactions('transaction-list', 3);
+            } else if (pageId === 'page-activity') {
+                populateTransactions('activity-list', appState.transactions.length);
+            }
+        }
+
+        // Transaction Rendering
+        function populateTransactions(containerId, limit = 10) {
+            const container = document.getElementById(containerId);
+            const transactions = appState.transactions.slice(0, limit);
+
+            container.innerHTML = transactions.map(txn => {
+                let icon, iconClass, title, subtitle, amountClass, amount;
+
+                if (txn.type === 'sent') {
+                    icon = '↗️';
+                    iconClass = 'sent';
+                    title = `Sent to ${txn.recipient}`;
+                    subtitle = formatDate(txn.date);
+                    amountClass = 'negative';
+                    amount = `-$${Math.abs(txn.amount).toFixed(2)}`;
+                } else if (txn.type === 'received') {
+                    icon = '↙️';
+                    iconClass = 'received';
+                    title = `Received from ${txn.sender}`;
+                    subtitle = formatDate(txn.date);
+                    amountClass = 'positive';
+                    amount = `+$${txn.amount.toFixed(2)}`;
+                } else if (txn.type === 'ach_pull') {
+                    icon = '🏦';
+                    iconClass = 'pending';
+                    title = `ACH Transfer from ${txn.bank}`;
+                    subtitle = txn.status === 'pending' ? `Pending (Est. ${formatDate(txn.estimatedSettlement)})` : formatDate(txn.date);
+                    amountClass = 'positive';
+                    amount = `+$${txn.amount.toFixed(2)}`;
+                }
+
+                const badgeHtml = txn.status !== 'completed' ?
+                    `<span class="badge badge-${txn.status === 'pending' ? 'pending' : 'error'}">${txn.status}</span>` : '';
+
+                return `
+                    <div class="transaction-item" onclick="showTransactionDetail('${txn.id}')">
+                        <div class="transaction-icon ${iconClass}">${icon}</div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">${title}</div>
+                            <div class="transaction-subtitle">${subtitle}</div>
+                            ${badgeHtml}
+                        </div>
+                        <div class="transaction-amount ${amountClass}">${amount}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function showTransactionDetail(txnId) {
+            const txn = appState.transactions.find(t => t.id === txnId);
+            if (!txn) return;
+
+            alert(`Transaction Details:\nID: ${txn.id}\nAmount: $${Math.abs(txn.amount)}\nStatus: ${txn.status}\nRoute: ${txn.route || 'N/A'}`);
+        }
+
+        // Onboarding Flow
+        function startKYC() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const phone = document.getElementById('signup-phone').value;
+
+            if (!name || !email || !phone) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            showLoading('Verifying email...');
+            setTimeout(() => {
+                hideLoading();
+                showPage('page-kyc');
+            }, 1500);
+        }
+
+        function completeKYC() {
+            showLoading('Submitting for verification...');
+            setTimeout(() => {
+                hideLoading();
+                showSuccess('KYC Verification Started', 'Your identity verification is being processed. This usually takes 1-2 minutes.');
+                setTimeout(() => {
+                    closeModal('success-modal');
+                    showPage('page-create-handle');
+                }, 2000);
+            }, 2000);
+        }
+
+        let handleCheckTimeout;
+        function checkHandle() {
+            clearTimeout(handleCheckTimeout);
+            const handle = document.getElementById('handle-input').value;
+            const statusDiv = document.getElementById('handle-status');
+
+            if (handle.length < 3) {
+                statusDiv.innerHTML = '<span style="color: #ff3b30;">Must be at least 3 characters</span>';
+                return;
+            }
+
+            statusDiv.innerHTML = '<span style="color: #888;">Checking availability...</span>';
+
+            handleCheckTimeout = setTimeout(() => {
+                // Simulate handle check
+                const taken = ['jane', 'bob', 'emily'].includes(handle.toLowerCase());
+                if (taken) {
+                    statusDiv.innerHTML = '<span style="color: #ff3b30;">❌ @' + handle + ' is taken</span>';
+                } else {
+                    statusDiv.innerHTML = '<span style="color: #34c759;">✓ @' + handle + ' is available</span>';
+                }
+            }, 500);
+        }
+
+        function simulatePlaidLink() {
+            showLoading('Connecting to Plaid...');
+            setTimeout(() => {
+                hideLoading();
+                showSuccess('Bank Account Linked', 'Chase Checking (••••4521) has been linked successfully.');
+                setTimeout(() => {
+                    closeModal('success-modal');
+                }, 2000);
+            }, 2000);
+        }
+
+        function completeOnboarding() {
+            showLoading('Setting up your wallet...');
+            setTimeout(() => {
+                hideLoading();
+                showSuccess('Welcome to Titan!', 'Your wallet is ready. Start sending and receiving money.');
+                setTimeout(() => {
+                    closeModal('success-modal');
+                    showPage('page-home');
+                }, 2000);
+            }, 1500);
+        }
+
+        // Payment Flows
+        function initiateSend() {
+            const recipient = document.getElementById('send-recipient').value;
+            const amount = parseFloat(document.getElementById('send-amount').value);
+            const note = document.getElementById('send-note').value;
+
+            if (!recipient || !amount) {
+                showError('Missing Information', 'Please enter a recipient and amount');
+                return;
+            }
+
+            if (amount > appState.currentUser.balance) {
+                showError('Insufficient Balance', `You only have $${appState.currentUser.balance.toFixed(2)} available`);
+                return;
+            }
+
+            // Check if same network or cross-network
+            const isSameNetwork = ['@emily', '@bob', '@alice'].includes(recipient.toLowerCase());
+            const route = isSameNetwork ? 'Same Network (Instant)' : 'Cross Network (RTP - 2-10 seconds)';
+
+            appState.pendingPayment = {
+                recipient,
+                amount,
+                note,
+                route,
+                isSameNetwork
+            };
+
+            document.getElementById('confirm-text').textContent = `Send $${amount.toFixed(2)} to ${recipient}?`;
+            document.getElementById('confirm-route').textContent = route;
+            showModal('confirm-modal');
+        }
+
+        function confirmPayment() {
+            closeModal('confirm-modal');
+            const { recipient, amount, note, isSameNetwork } = appState.pendingPayment;
+
+            if (isSameNetwork) {
+                // Same network - instant
+                showLoading('Processing payment...');
+                setTimeout(() => {
+                    hideLoading();
+                    appState.currentUser.balance -= amount;
+                    appState.transactions.unshift({
+                        id: 'txn_' + Date.now(),
+                        type: 'sent',
+                        amount: -amount,
+                        recipient,
+                        status: 'completed',
+                        date: new Date().toISOString(),
+                        route: 'same_network',
+                        note
+                    });
+                    updateBalance();
+                    showSuccess('Payment Sent!', `$${amount.toFixed(2)} sent to ${recipient} instantly`);
+                    setTimeout(() => {
+                        closeModal('success-modal');
+                        showPage('page-home');
+                    }, 2000);
+                }, 800);
+            } else {
+                // Cross network - RTP with settlement delay
+                showLoading('Initiating RTP transfer...');
+                setTimeout(() => {
+                    hideLoading();
+                    showSuccess('RTP Transfer Initiated', 'Your payment is being processed via the RTP network. Settlement typically takes 2-10 seconds.');
+                    setTimeout(() => {
+                        closeModal('success-modal');
+                        // Simulate RTP settlement
+                        setTimeout(() => {
+                            showSuccess('Payment Settled!', `$${amount.toFixed(2)} successfully sent to ${recipient}`);
+                            appState.currentUser.balance -= amount;
+                            appState.transactions.unshift({
+                                id: 'txn_' + Date.now(),
+                                type: 'sent',
+                                amount: -amount,
+                                recipient,
+                                status: 'completed',
+                                date: new Date().toISOString(),
+                                route: 'rtp',
+                                note
+                            });
+                            updateBalance();
+                            setTimeout(() => {
+                                closeModal('success-modal');
+                                showPage('page-home');
+                            }, 2000);
+                        }, 3000);
+                    }, 1500);
+                }, 1000);
+            }
+        }
+
+        function initiateACHPull() {
+            const amount = parseFloat(document.getElementById('ach-amount').value);
+
+            if (!amount || amount <= 0) {
+                showError('Invalid Amount', 'Please enter a valid amount');
+                return;
+            }
+
+            showLoading('Initiating ACH transfer...');
+            setTimeout(() => {
+                hideLoading();
+
+                // Add pending transaction
+                const settlementDate = new Date();
+                settlementDate.setDate(settlementDate.getDate() + 2);
+
+                appState.transactions.unshift({
+                    id: 'txn_' + Date.now(),
+                    type: 'ach_pull',
+                    amount: amount,
+                    bank: 'Chase ••••4521',
+                    status: 'pending',
+                    date: new Date().toISOString(),
+                    estimatedSettlement: settlementDate.toISOString()
+                });
+
+                appState.currentUser.pendingBalance += amount;
+                updateBalance();
+
+                showSuccess('ACH Transfer Initiated', `$${amount.toFixed(2)} will be available in 1-3 business days`);
+                setTimeout(() => {
+                    closeModal('success-modal');
+                    showPage('page-home');
+                }, 2000);
+            }, 1500);
+        }
+
+        function simulateQRScan() {
+            showLoading('Scanning QR code...');
+            setTimeout(() => {
+                hideLoading();
+                // Simulate QR code detection
+                const merchantHandle = '@coffee_shop';
+                const amount = 5.75;
+
+                document.getElementById('send-recipient').value = merchantHandle;
+                document.getElementById('send-amount').value = amount;
+                document.getElementById('send-note').value = 'Coffee payment';
+
+                showPage('page-send');
+
+                setTimeout(() => {
+                    initiateSend();
+                }, 500);
+            }, 1500);
+        }
+
+        // Error Flow Testing
+        function testErrorFlow(errorType) {
+            switch(errorType) {
+                case 'insufficient_balance':
+                    showError('Insufficient Balance', 'You do not have enough funds to complete this transaction. Available: $1,234.56, Required: $2,000.00');
+                    break;
+                case 'fraud_block':
+                    showError('Transaction Blocked', 'This transaction has been blocked due to suspicious activity. Please contact support if you believe this is an error.');
+                    break;
+                case 'rtp_timeout':
+                    showError('RTP Timeout', 'The RTP network did not respond in time. Your payment has been voided and funds returned to your balance.');
+                    break;
+                case 'ach_failure':
+                    showError('ACH Transfer Failed', 'Your bank declined this transfer. Reason: Insufficient funds in source account.');
+                    break;
+            }
+        }
+
+        // UI Helper Functions
+        function updateBalance() {
+            document.getElementById('balance-available').textContent = `$${appState.currentUser.balance.toFixed(2)}`;
+            document.getElementById('balance-pending').textContent = `$${appState.currentUser.pendingBalance.toFixed(2)}`;
+        }
+
+        function showLoading(text = 'Loading...') {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-overlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.remove('active');
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showSuccess(title, text) {
+            document.getElementById('success-title').textContent = title;
+            document.getElementById('success-text').textContent = text;
+            showModal('success-modal');
+        }
+
+        function showError(title, text) {
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-text').textContent = text;
+            showModal('error-modal');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            populateTransactions('transaction-list', 3);
+            updateBalance();
+        });
+    </script>
+</body>
+</html>

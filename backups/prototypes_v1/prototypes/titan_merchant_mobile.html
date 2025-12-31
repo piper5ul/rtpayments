@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Merchant - Mobile App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .app-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #f5f5f7;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 20px;
+        }
+
+        .merchant-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .merchant-handle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .merchant-status {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .summary-card {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .summary-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 0 20px 20px 20px;
+        }
+
+        .quick-action {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-action:active {
+            transform: scale(0.95);
+        }
+
+        .quick-action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .quick-action-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .section-header {
+            padding: 20px 20px 12px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .transaction-list {
+            padding: 0 20px 20px 20px;
+        }
+
+        .transaction-item {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .transaction-item:active {
+            transform: scale(0.98);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .transaction-customer {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #34c759;
+        }
+
+        .transaction-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 16px;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active .nav-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-item.active .nav-label {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 340px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .qr-code {
+            width: 250px;
+            height: 250px;
+            background: #f5f5f7;
+            margin: 0 auto 16px auto;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+        }
+
+        .qr-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .qr-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f5f5f7;
+            color: #1d1d1f;
+            margin-top: 12px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .customer-item {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+        }
+
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .customer-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .customer-handle {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .customer-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .settlement-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin: 20px;
+        }
+
+        .settlement-period {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .settlement-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .settlement-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .breakdown-item {
+            background: rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .breakdown-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .breakdown-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e5f5e5;
+            color: #34c759;
+        }
+
+        .badge-pending {
+            background: #fff5e5;
+            color: #ff9500;
+        }
+
+        .badge-refunded {
+            background: #ffe5e5;
+            color: #ff3b30;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .chart-container {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 150px;
+            gap: 8px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .setting-item {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .setting-label {
+            font-size: 16px;
+            color: #1d1d1f;
+        }
+
+        .setting-value {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .tab-content {
+            padding: 20px;
+        }
+
+        .payment-link-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .link-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .link-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .link-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .link-url {
+            font-size: 12px;
+            color: #007aff;
+            padding: 8px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+
+        .link-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <div class="app-container">
+            <!-- HOME PAGE -->
+            <div id="page-home" class="page active">
+                <div class="header">
+                    <div class="merchant-name">Joe's Coffee Shop</div>
+                    <div class="merchant-handle">@joescoffee</div>
+                    <span class="merchant-status">✓ Verified Merchant</span>
+                </div>
+
+                <div class="settlement-card">
+                    <div class="settlement-period">Today's Revenue</div>
+                    <div class="settlement-amount">$847.50</div>
+                    <div class="settlement-breakdown">
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Transactions</div>
+                            <div class="breakdown-value">28</div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Avg. Amount</div>
+                            <div class="breakdown-value">$30.27</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="showPage('page-accept')">
+                        <div class="quick-action-icon">📷</div>
+                        <div class="quick-action-label">Scan to Accept</div>
+                    </div>
+                    <div class="quick-action" onclick="openModal('generate-qr-modal')">
+                        <div class="quick-action-icon">📱</div>
+                        <div class="quick-action-label">Show My QR</div>
+                    </div>
+                    <div class="quick-action" onclick="openModal('payment-request-modal')">
+                        <div class="quick-action-icon">💸</div>
+                        <div class="quick-action-label">Request Payment</div>
+                    </div>
+                    <div class="quick-action" onclick="showPage('page-transactions'); setActiveNav('transactions')">
+                        <div class="quick-action-icon">📊</div>
+                        <div class="quick-action-label">View Reports</div>
+                    </div>
+                </div>
+
+                <div class="section-header">Recent Transactions</div>
+                <div class="transaction-list">
+                    <div class="transaction-item" onclick="openTransactionDetail('txn_001')">
+                        <div class="transaction-header">
+                            <div class="transaction-customer">@sarah_m</div>
+                            <div class="transaction-amount">+$4.75</div>
+                        </div>
+                        <div class="transaction-meta">
+                            <span>Latte + Croissant</span>
+                            <span>2 mins ago</span>
+                        </div>
+                    </div>
+                    <div class="transaction-item" onclick="openTransactionDetail('txn_002')">
+                        <div class="transaction-header">
+                            <div class="transaction-customer">@mike_jones</div>
+                            <div class="transaction-amount">+$12.50</div>
+                        </div>
+                        <div class="transaction-meta">
+                            <span>Lunch order</span>
+                            <span>15 mins ago</span>
+                        </div>
+                    </div>
+                    <div class="transaction-item" onclick="openTransactionDetail('txn_003')">
+                        <div class="transaction-header">
+                            <div class="transaction-customer">@emma_w</div>
+                            <div class="transaction-amount">+$6.25</div>
+                        </div>
+                        <div class="transaction-meta">
+                            <span>Coffee to go</span>
+                            <span>42 mins ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCEPT PAYMENT PAGE -->
+            <div id="page-accept" class="page">
+                <div class="header">
+                    <div class="merchant-name">Accept Payment</div>
+                    <div class="merchant-handle">Scan customer QR or show yours</div>
+                </div>
+
+                <div class="tab-content">
+                    <button class="btn btn-primary" onclick="simulateScanCustomerQR()">
+                        📷 Scan Customer QR Code
+                    </button>
+                    <button class="btn btn-secondary" onclick="openModal('generate-qr-modal')">
+                        📱 Show My QR Code
+                    </button>
+                    <button class="btn btn-secondary" onclick="openModal('manual-accept-modal')">
+                        ✍️ Enter @handle Manually
+                    </button>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">This Week's Transactions</div>
+                    <div class="bar-chart">
+                        <div class="bar" style="height: 60%;">
+                            <div class="bar-label">Mon</div>
+                        </div>
+                        <div class="bar" style="height: 75%;">
+                            <div class="bar-label">Tue</div>
+                        </div>
+                        <div class="bar" style="height: 45%;">
+                            <div class="bar-label">Wed</div>
+                        </div>
+                        <div class="bar" style="height: 90%;">
+                            <div class="bar-label">Thu</div>
+                        </div>
+                        <div class="bar" style="height: 100%;">
+                            <div class="bar-label">Fri</div>
+                        </div>
+                        <div class="bar" style="height: 85%;">
+                            <div class="bar-label">Sat</div>
+                        </div>
+                        <div class="bar" style="height: 70%;">
+                            <div class="bar-label">Sun</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRANSACTIONS PAGE -->
+            <div id="page-transactions" class="page">
+                <div class="header">
+                    <div class="merchant-name">Transactions</div>
+                    <div class="merchant-handle">View and manage payments</div>
+                </div>
+
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="filterTransactions('all')">All</div>
+                    <div class="filter-tab" onclick="filterTransactions('today')">Today</div>
+                    <div class="filter-tab" onclick="filterTransactions('week')">This Week</div>
+                    <div class="filter-tab" onclick="filterTransactions('month')">This Month</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-title">Settlement Summary</div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-value">$847.50</div>
+                            <div class="summary-label">Today</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">$5,240</div>
+                            <div class="summary-label">This Week</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">$21,890</div>
+                            <div class="summary-label">This Month</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">1,247</div>
+                            <div class="summary-label">Total Txns</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transaction-list">
+                    <div class="transaction-item" onclick="openTransactionDetail('txn_001')">
+                        <div class="transaction-header">
+                            <div>
+                                <div class="transaction-customer">@sarah_m</div>
+                                <div class="customer-handle">Sarah Martinez</div>
+                            </div>
+                            <div>
+                                <div class="transaction-amount">+$4.75</div>
+                                <span class="badge badge-success">Completed</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <span>Latte + Croissant</span>
+                            <span>Dec 29, 9:39 AM</span>
+                        </div>
+                    </div>
+                    <div class="transaction-item" onclick="openTransactionDetail('txn_002')">
+                        <div class="transaction-header">
+                            <div>
+                                <div class="transaction-customer">@mike_jones</div>
+                                <div class="customer-handle">Mike Jones</div>
+                            </div>
+                            <div>
+                                <div class="transaction-amount">+$12.50</div>
+                                <span class="badge badge-success">Completed</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <span>Lunch order</span>
+                            <span>Dec 29, 9:26 AM</span>
+                        </div>
+                    </div>
+                    <div class="transaction-item" onclick="openTransactionDetail('txn_004')">
+                        <div class="transaction-header">
+                            <div>
+                                <div class="transaction-customer">@lisa_chen</div>
+                                <div class="customer-handle">Lisa Chen</div>
+                            </div>
+                            <div>
+                                <div class="transaction-amount">-$8.50</div>
+                                <span class="badge badge-refunded">Refunded</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <span>Order #4521</span>
+                            <span>Dec 28, 3:15 PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CUSTOMERS PAGE -->
+            <div id="page-customers" class="page">
+                <div class="header">
+                    <div class="merchant-name">Customers</div>
+                    <div class="merchant-handle">Frequent customers & history</div>
+                </div>
+
+                <div class="tab-content">
+                    <div class="input-group">
+                        <input type="text" class="input" placeholder="Search customers..." id="customer-search">
+                    </div>
+                </div>
+
+                <div class="transaction-list">
+                    <div class="customer-item" onclick="openCustomerDetail('cust_001')">
+                        <div class="customer-header">
+                            <div>
+                                <div class="customer-name">Sarah Martinez</div>
+                                <div class="customer-handle">@sarah_m</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 16px; font-weight: 700; color: #34c759;">$247.85</div>
+                                <div style="font-size: 12px; color: #888;">Lifetime</div>
+                            </div>
+                        </div>
+                        <div class="customer-stats">
+                            <span>42 transactions</span>
+                            <span>•</span>
+                            <span>Last visit: Today</span>
+                        </div>
+                    </div>
+                    <div class="customer-item" onclick="openCustomerDetail('cust_002')">
+                        <div class="customer-header">
+                            <div>
+                                <div class="customer-name">Mike Jones</div>
+                                <div class="customer-handle">@mike_jones</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 16px; font-weight: 700; color: #34c759;">$184.50</div>
+                                <div style="font-size: 12px; color: #888;">Lifetime</div>
+                            </div>
+                        </div>
+                        <div class="customer-stats">
+                            <span>28 transactions</span>
+                            <span>•</span>
+                            <span>Last visit: Today</span>
+                        </div>
+                    </div>
+                    <div class="customer-item" onclick="openCustomerDetail('cust_003')">
+                        <div class="customer-header">
+                            <div>
+                                <div class="customer-name">Emma Wilson</div>
+                                <div class="customer-handle">@emma_w</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 16px; font-weight: 700; color: #34c759;">$92.25</div>
+                                <div style="font-size: 12px; color: #888;">Lifetime</div>
+                            </div>
+                        </div>
+                        <div class="customer-stats">
+                            <span>15 transactions</span>
+                            <span>•</span>
+                            <span>Last visit: Yesterday</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS PAGE -->
+            <div id="page-settings" class="page">
+                <div class="header">
+                    <div class="merchant-name">Settings</div>
+                    <div class="merchant-handle">Account & preferences</div>
+                </div>
+
+                <div class="section-header">Business Profile</div>
+                <div style="padding: 0 20px;">
+                    <div class="setting-item" onclick="alert('Edit business name')">
+                        <span class="setting-label">Business Name</span>
+                        <span class="setting-value">Joe's Coffee Shop →</span>
+                    </div>
+                    <div class="setting-item" onclick="alert('Edit @handle')">
+                        <span class="setting-label">@handle</span>
+                        <span class="setting-value">@joescoffee →</span>
+                    </div>
+                    <div class="setting-item" onclick="alert('Edit business category')">
+                        <span class="setting-label">Category</span>
+                        <span class="setting-value">Food & Beverage →</span>
+                    </div>
+                </div>
+
+                <div class="section-header">Payment Settings</div>
+                <div style="padding: 0 20px;">
+                    <div class="setting-item" onclick="openModal('payment-links-modal')">
+                        <span class="setting-label">Payment Links</span>
+                        <span class="setting-value">3 Active →</span>
+                    </div>
+                    <div class="setting-item" onclick="alert('Settlement schedule: Daily at 6 AM')">
+                        <span class="setting-label">Settlement Schedule</span>
+                        <span class="setting-value">Daily →</span>
+                    </div>
+                    <div class="setting-item" onclick="alert('View refund history')">
+                        <span class="setting-label">Refunds</span>
+                        <span class="setting-value">View History →</span>
+                    </div>
+                </div>
+
+                <div class="section-header">Notifications</div>
+                <div style="padding: 0 20px;">
+                    <div class="setting-item">
+                        <span class="setting-label">Payment Received</span>
+                        <span class="setting-value">✓ Enabled</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Daily Summary</span>
+                        <span class="setting-value">✓ Enabled</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Settlement Reports</span>
+                        <span class="setting-value">✓ Enabled</span>
+                    </div>
+                </div>
+
+                <div class="section-header">Support</div>
+                <div style="padding: 0 20px;">
+                    <div class="setting-item">
+                        <span class="setting-label">Help Center</span>
+                        <span class="setting-value">→</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Contact Support</span>
+                        <span class="setting-value">→</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">App Version</span>
+                        <span class="setting-value">1.0.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="showPage('page-home'); setActiveNav('home')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </div>
+            <div class="nav-item" onclick="showPage('page-accept'); setActiveNav('accept')">
+                <div class="nav-icon">📷</div>
+                <div class="nav-label">Accept</div>
+            </div>
+            <div class="nav-item" onclick="showPage('page-transactions'); setActiveNav('transactions')">
+                <div class="nav-icon">💳</div>
+                <div class="nav-label">Transactions</div>
+            </div>
+            <div class="nav-item" onclick="showPage('page-customers'); setActiveNav('customers')">
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">Customers</div>
+            </div>
+            <div class="nav-item" onclick="showPage('page-settings'); setActiveNav('settings')">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">Settings</div>
+            </div>
+        </div>
+
+        <!-- MODALS -->
+
+        <!-- Generate QR Modal -->
+        <div id="generate-qr-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">My QR Code</div>
+                    <div class="close-btn" onclick="closeModal('generate-qr-modal')">✕</div>
+                </div>
+                <div class="qr-container" style="margin: 0; padding: 20px;">
+                    <div class="qr-code">
+                        <div style="font-size: 120px;">⬛</div>
+                    </div>
+                    <div class="qr-label">@joescoffee</div>
+                    <div style="font-size: 14px; color: #888; margin-bottom: 20px;">
+                        Show this QR code to customers
+                    </div>
+                    <button class="btn btn-secondary" onclick="generateDynamicQR()">
+                        Generate QR with Amount
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic QR Modal -->
+        <div id="dynamic-qr-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Generate Payment QR</div>
+                    <div class="close-btn" onclick="closeModal('dynamic-qr-modal')">✕</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Amount</label>
+                    <input type="number" class="input" id="qr-amount" placeholder="0.00" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Description (Optional)</label>
+                    <input type="text" class="input" id="qr-description" placeholder="e.g., Table 5 order">
+                </div>
+                <button class="btn btn-primary" onclick="createDynamicQR()">Generate QR Code</button>
+            </div>
+        </div>
+
+        <!-- Payment Request Modal -->
+        <div id="payment-request-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Request Payment</div>
+                    <div class="close-btn" onclick="closeModal('payment-request-modal')">✕</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Amount</label>
+                    <input type="number" class="input" id="request-amount" placeholder="0.00" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Description</label>
+                    <input type="text" class="input" id="request-description" placeholder="e.g., Order #1234">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Expires In</label>
+                    <select class="input" id="request-expiry">
+                        <option value="1">1 hour</option>
+                        <option value="24">24 hours</option>
+                        <option value="72">3 days</option>
+                        <option value="168">1 week</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="createPaymentRequest()">Create Payment Link</button>
+            </div>
+        </div>
+
+        <!-- Manual Accept Modal -->
+        <div id="manual-accept-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Accept Payment</div>
+                    <div class="close-btn" onclick="closeModal('manual-accept-modal')">✕</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Customer @handle</label>
+                    <input type="text" class="input" id="manual-handle" placeholder="@username">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Amount</label>
+                    <input type="number" class="input" id="manual-amount" placeholder="0.00" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Description (Optional)</label>
+                    <input type="text" class="input" id="manual-description" placeholder="e.g., Coffee order">
+                </div>
+                <button class="btn btn-primary" onclick="processManualPayment()">Request Payment</button>
+            </div>
+        </div>
+
+        <!-- Transaction Detail Modal -->
+        <div id="transaction-detail-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Transaction Details</div>
+                    <div class="close-btn" onclick="closeModal('transaction-detail-modal')">✕</div>
+                </div>
+                <div id="transaction-detail-content">
+                    <!-- Populated dynamically -->
+                </div>
+                <button class="btn btn-secondary" onclick="initiateRefund()">Issue Refund</button>
+            </div>
+        </div>
+
+        <!-- Customer Detail Modal -->
+        <div id="customer-detail-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Customer Details</div>
+                    <div class="close-btn" onclick="closeModal('customer-detail-modal')">✕</div>
+                </div>
+                <div id="customer-detail-content">
+                    <!-- Populated dynamically -->
+                </div>
+                <button class="btn btn-secondary" onclick="closeModal('customer-detail-modal')">Close</button>
+            </div>
+        </div>
+
+        <!-- Payment Links Modal -->
+        <div id="payment-links-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Payment Links</div>
+                    <div class="close-btn" onclick="closeModal('payment-links-modal')">✕</div>
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <div class="payment-link-card">
+                        <div class="link-header">
+                            <div class="link-amount">$50.00</div>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <div class="link-description">Catering deposit</div>
+                        <div class="link-url">titan.app/pay/joescoffee/abc123</div>
+                        <div class="link-footer">
+                            <span>Expires in 5 days</span>
+                            <span>0 payments</span>
+                        </div>
+                    </div>
+                    <div class="payment-link-card">
+                        <div class="link-header">
+                            <div class="link-amount">$25.00</div>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <div class="link-description">Gift card purchase</div>
+                        <div class="link-url">titan.app/pay/joescoffee/def456</div>
+                        <div class="link-footer">
+                            <span>No expiration</span>
+                            <span>3 payments received</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="closeModal('payment-links-modal'); openModal('payment-request-modal')">Create New Link</button>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="success-modal" class="modal">
+            <div class="modal-content" style="text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 16px;">✅</div>
+                <div class="modal-title" id="success-title">Success!</div>
+                <p id="success-message" style="color: #666; margin: 16px 0;"></p>
+                <button class="btn btn-primary" onclick="closeModal('success-modal')">Done</button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <div class="loading-text" id="loading-text">Processing...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const appState = {
+            merchantInfo: {
+                name: "Joe's Coffee Shop",
+                handle: "@joescoffee",
+                balance: 24750.85
+            },
+            transactions: [
+                {
+                    id: 'txn_001',
+                    customer: '@sarah_m',
+                    customerName: 'Sarah Martinez',
+                    amount: 4.75,
+                    description: 'Latte + Croissant',
+                    timestamp: 'Dec 29, 9:39 AM',
+                    status: 'completed',
+                    transactionId: 'txn_abc123def',
+                    paymentMethod: 'Titan Wallet'
+                },
+                {
+                    id: 'txn_002',
+                    customer: '@mike_jones',
+                    customerName: 'Mike Jones',
+                    amount: 12.50,
+                    description: 'Lunch order',
+                    timestamp: 'Dec 29, 9:26 AM',
+                    status: 'completed',
+                    transactionId: 'txn_ghi456jkl',
+                    paymentMethod: 'Titan Wallet'
+                },
+                {
+                    id: 'txn_003',
+                    customer: '@emma_w',
+                    customerName: 'Emma Wilson',
+                    amount: 6.25,
+                    description: 'Coffee to go',
+                    timestamp: 'Dec 29, 8:57 AM',
+                    status: 'completed',
+                    transactionId: 'txn_mno789pqr',
+                    paymentMethod: 'Titan Wallet'
+                },
+                {
+                    id: 'txn_004',
+                    customer: '@lisa_chen',
+                    customerName: 'Lisa Chen',
+                    amount: -8.50,
+                    description: 'Order #4521',
+                    timestamp: 'Dec 28, 3:15 PM',
+                    status: 'refunded',
+                    transactionId: 'txn_stu012vwx',
+                    paymentMethod: 'Titan Wallet'
+                }
+            ],
+            customers: [
+                {
+                    id: 'cust_001',
+                    name: 'Sarah Martinez',
+                    handle: '@sarah_m',
+                    lifetimeValue: 247.85,
+                    transactionCount: 42,
+                    lastVisit: 'Today',
+                    notes: 'Regular customer, prefers oat milk'
+                },
+                {
+                    id: 'cust_002',
+                    name: 'Mike Jones',
+                    handle: '@mike_jones',
+                    lifetimeValue: 184.50,
+                    transactionCount: 28,
+                    lastVisit: 'Today',
+                    notes: 'Lunch regular Mon-Fri'
+                },
+                {
+                    id: 'cust_003',
+                    name: 'Emma Wilson',
+                    handle: '@emma_w',
+                    lifetimeValue: 92.25,
+                    transactionCount: 15,
+                    lastVisit: 'Yesterday',
+                    notes: ''
+                }
+            ]
+        };
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function setActiveNav(navId) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            const navItems = document.querySelectorAll('.nav-item');
+            const navMap = {
+                'home': 0,
+                'accept': 1,
+                'transactions': 2,
+                'customers': 3,
+                'settings': 4
+            };
+
+            if (navMap[navId] !== undefined) {
+                navItems[navMap[navId]].classList.add('active');
+            }
+        }
+
+        // Modal Management
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Loading
+        function showLoading(message) {
+            document.getElementById('loading-text').textContent = message;
+            document.getElementById('loading-overlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.remove('active');
+        }
+
+        // Success Modal
+        function showSuccess(title, message) {
+            document.getElementById('success-title').textContent = title;
+            document.getElementById('success-message').textContent = message;
+            openModal('success-modal');
+        }
+
+        // QR Code Generation
+        function generateDynamicQR() {
+            closeModal('generate-qr-modal');
+            openModal('dynamic-qr-modal');
+        }
+
+        function createDynamicQR() {
+            const amount = document.getElementById('qr-amount').value;
+            const description = document.getElementById('qr-description').value;
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            showLoading('Generating QR code...');
+            setTimeout(() => {
+                hideLoading();
+                closeModal('dynamic-qr-modal');
+                showSuccess(
+                    'QR Code Generated!',
+                    `Payment QR for $${amount} created. ${description ? description : 'Show to customer to scan.'}`
+                );
+            }, 1500);
+        }
+
+        // Scan Customer QR
+        function simulateScanCustomerQR() {
+            showLoading('Opening camera...');
+            setTimeout(() => {
+                showLoading('Scanning QR code...');
+            }, 1000);
+            setTimeout(() => {
+                showLoading('Resolving @handle...');
+            }, 2000);
+            setTimeout(() => {
+                hideLoading();
+                // Simulate finding customer
+                const amount = (Math.random() * 50 + 5).toFixed(2);
+                showSuccess(
+                    'Payment Received!',
+                    `$${amount} from @customer_123. Transaction completed.`
+                );
+
+                // Add to transaction list
+                setTimeout(() => {
+                    closeModal('success-modal');
+                    showPage('page-home');
+                    setActiveNav('home');
+                }, 3000);
+            }, 3500);
+        }
+
+        // Payment Request
+        function createPaymentRequest() {
+            const amount = document.getElementById('request-amount').value;
+            const description = document.getElementById('request-description').value;
+            const expiry = document.getElementById('request-expiry').value;
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            if (!description) {
+                alert('Please enter a description');
+                return;
+            }
+
+            showLoading('Creating payment link...');
+            setTimeout(() => {
+                hideLoading();
+                closeModal('payment-request-modal');
+
+                const linkId = Math.random().toString(36).substring(7);
+                const link = `titan.app/pay/joescoffee/${linkId}`;
+
+                showSuccess(
+                    'Payment Link Created!',
+                    `Share this link: ${link}\nExpires in ${expiry} hours.`
+                );
+            }, 1500);
+        }
+
+        // Manual Payment
+        function processManualPayment() {
+            const handle = document.getElementById('manual-handle').value;
+            const amount = document.getElementById('manual-amount').value;
+            const description = document.getElementById('manual-description').value;
+
+            if (!handle || !handle.startsWith('@')) {
+                alert('Please enter a valid @handle');
+                return;
+            }
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            showLoading('Resolving @handle via HRS...');
+            setTimeout(() => {
+                showLoading('Requesting payment...');
+            }, 1000);
+            setTimeout(() => {
+                showLoading('Waiting for customer approval...');
+            }, 2000);
+            setTimeout(() => {
+                hideLoading();
+                closeModal('manual-accept-modal');
+                showSuccess(
+                    'Payment Request Sent!',
+                    `Sent $${amount} request to ${handle}. They will receive a notification.`
+                );
+            }, 4000);
+        }
+
+        // Transaction Detail
+        function openTransactionDetail(txnId) {
+            const txn = appState.transactions.find(t => t.id === txnId);
+            if (!txn) return;
+
+            const content = `
+                <div class="detail-row">
+                    <span class="detail-label">Customer</span>
+                    <span class="detail-value">${txn.customerName}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">@handle</span>
+                    <span class="detail-value">${txn.customer}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount</span>
+                    <span class="detail-value">$${Math.abs(txn.amount).toFixed(2)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">${txn.description}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date & Time</span>
+                    <span class="detail-value">${txn.timestamp}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value">
+                        <span class="badge badge-${txn.status === 'completed' ? 'success' : 'refunded'}">
+                            ${txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction ID</span>
+                    <span class="detail-value" style="font-size: 12px;">${txn.transactionId}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method</span>
+                    <span class="detail-value">${txn.paymentMethod}</span>
+                </div>
+            `;
+
+            document.getElementById('transaction-detail-content').innerHTML = content;
+            openModal('transaction-detail-modal');
+        }
+
+        // Customer Detail
+        function openCustomerDetail(custId) {
+            const customer = appState.customers.find(c => c.id === custId);
+            if (!customer) return;
+
+            const content = `
+                <div class="detail-row">
+                    <span class="detail-label">Name</span>
+                    <span class="detail-value">${customer.name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">@handle</span>
+                    <span class="detail-value">${customer.handle}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Lifetime Value</span>
+                    <span class="detail-value">$${customer.lifetimeValue.toFixed(2)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Transactions</span>
+                    <span class="detail-value">${customer.transactionCount}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Last Visit</span>
+                    <span class="detail-value">${customer.lastVisit}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Average Order</span>
+                    <span class="detail-value">$${(customer.lifetimeValue / customer.transactionCount).toFixed(2)}</span>
+                </div>
+                ${customer.notes ? `
+                <div class="detail-row">
+                    <span class="detail-label">Notes</span>
+                    <span class="detail-value">${customer.notes}</span>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('customer-detail-content').innerHTML = content;
+            openModal('customer-detail-modal');
+        }
+
+        // Refund
+        function initiateRefund() {
+            if (confirm('Are you sure you want to issue a full refund for this transaction?')) {
+                showLoading('Processing refund...');
+                setTimeout(() => {
+                    hideLoading();
+                    closeModal('transaction-detail-modal');
+                    showSuccess(
+                        'Refund Processed!',
+                        'The refund has been initiated. Funds will be returned to the customer within 3-5 business days.'
+                    );
+                }, 2000);
+            }
+        }
+
+        // Filter Transactions
+        function filterTransactions(filter) {
+            // Update active filter tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // In a real app, this would filter the transaction list
+            console.log('Filtering transactions:', filter);
+        }
+
+        // Customer Search
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('customer-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    console.log('Searching customers:', query);
+                    // In a real app, this would filter the customer list
+                });
+            }
+        });
+    </script>
+</body>
+</html>

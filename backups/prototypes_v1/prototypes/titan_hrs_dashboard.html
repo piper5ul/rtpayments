@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Wallet - HRS Operations Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: #161b22;
+            border-right: 1px solid #30363d;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 0 24px 24px 24px;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            color: #58a6ff;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .logo p {
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-section {
+            padding: 12px 24px;
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #c9d1d9;
+        }
+
+        .nav-item:hover {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 3px solid #58a6ff;
+        }
+
+        .nav-item.active {
+            background: rgba(88, 166, 255, 0.15);
+            border-left: 3px solid #58a6ff;
+            color: #58a6ff;
+        }
+
+        .nav-icon {
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 20px 32px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            color: #58a6ff;
+            font-weight: 600;
+        }
+
+        .header-meta {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-operational {
+            background: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+        }
+
+        .status-degraded {
+            background: rgba(219, 109, 40, 0.15);
+            color: #db6d28;
+        }
+
+        .status-down {
+            background: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change.positive {
+            color: #3fb950;
+        }
+
+        .stat-change.negative {
+            color: #f85149;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: #c9d1d9;
+        }
+
+        .btn:hover {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: #58a6ff;
+        }
+
+        .btn-primary {
+            background: #238636;
+            border-color: #238636;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn-danger {
+            background: #da3633;
+            border-color: #da3633;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #f85149;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #21262d;
+            align-items: center;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .metric-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58a6ff, #1f6feb);
+            transition: width 0.5s;
+        }
+
+        .chart-container {
+            height: 300px;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+            font-size: 13px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(to top, rgba(88, 166, 255, 0.2), transparent);
+            clip-path: polygon(
+                0% 80%, 10% 75%, 20% 82%, 30% 70%, 40% 65%,
+                50% 72%, 60% 60%, 70% 68%, 80% 55%, 90% 62%, 100% 50%,
+                100% 100%, 0% 100%
+            );
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 12px;
+            background: #0d1117;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #8b949e;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .table tr:hover {
+            background: rgba(88, 166, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+        }
+
+        .badge-warning {
+            background: rgba(219, 109, 40, 0.15);
+            color: #db6d28;
+        }
+
+        .badge-error {
+            background: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+        }
+
+        .badge-info {
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+        }
+
+        .code {
+            font-family: 'SF Mono', monospace;
+            background: #0d1117;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #79c0ff;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #8b949e;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #c9d1d9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #c9d1d9;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #c9d1d9;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(46, 160, 67, 0.15);
+            border: 1px solid rgba(46, 160, 67, 0.3);
+            color: #3fb950;
+        }
+
+        .alert-warning {
+            background: rgba(219, 109, 40, 0.15);
+            border: 1px solid rgba(219, 109, 40, 0.3);
+            color: #db6d28;
+        }
+
+        .alert-error {
+            background: rgba(248, 81, 73, 0.15);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: #f85149;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            color: #8b949e;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #58a6ff;
+            border-bottom-color: #58a6ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>🔍 HRS Ops</h1>
+            <p>Handle Resolution Service</p>
+        </div>
+
+        <div class="nav-section">Monitoring</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showPage('metrics')">
+            <span class="nav-icon">📈</span>
+            <span>Real-Time Metrics</span>
+        </div>
+        <div class="nav-item" onclick="showPage('performance')">
+            <span class="nav-icon">⚡</span>
+            <span>Performance</span>
+        </div>
+
+        <div class="nav-section">Management</div>
+        <div class="nav-item" onclick="showPage('registry')">
+            <span class="nav-icon">📇</span>
+            <span>Handle Registry</span>
+        </div>
+        <div class="nav-item" onclick="showPage('routing')">
+            <span class="nav-icon">🔀</span>
+            <span>Routing Analytics</span>
+        </div>
+        <div class="nav-item" onclick="showPage('cache')">
+            <span class="nav-icon">💾</span>
+            <span>Cache Management</span>
+        </div>
+
+        <div class="nav-section">Security</div>
+        <div class="nav-item" onclick="showPage('fraud')">
+            <span class="nav-icon">🛡️</span>
+            <span>Fraud Rules</span>
+        </div>
+        <div class="nav-item" onclick="showPage('rate-limits')">
+            <span class="nav-icon">🚦</span>
+            <span>Rate Limiting</span>
+        </div>
+
+        <div class="nav-section">Configuration</div>
+        <div class="nav-item" onclick="showPage('alerts')">
+            <span class="nav-icon">🔔</span>
+            <span>Alerts</span>
+        </div>
+        <div class="nav-item" onclick="showPage('config')">
+            <span class="nav-icon">⚙️</span>
+            <span>Configuration</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active">
+            <div class="header">
+                <div>
+                    <h2>HRS Operations Dashboard</h2>
+                    <div class="header-meta">Last updated: 2 seconds ago • Uptime: 99.98%</div>
+                </div>
+                <div class="status-indicator status-operational">
+                    <span class="pulse"></span>
+                    <span>All Systems Operational</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Requests / Second</div>
+                    <div class="stat-value">847</div>
+                    <div class="stat-change positive">↑ 12.5% vs 1h ago</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Latency (p50)</div>
+                    <div class="stat-value">3.2ms</div>
+                    <div class="stat-change positive">↓ 0.8ms vs 1h ago</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cache Hit Rate</div>
+                    <div class="stat-value">94.7%</div>
+                    <div class="stat-change positive">↑ 2.1% vs 1h ago</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Error Rate</div>
+                    <div class="stat-value">0.02%</div>
+                    <div class="stat-change positive">↓ 0.01% vs 1h ago</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Request Volume (24h)</h3>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-line"></div>
+                        <div style="position: relative; z-index: 1;">📊 Real-time request graph</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Latency Distribution (24h)</h3>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">p50 (median)</span>
+                        <span class="metric-value">3.2ms</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">p95</span>
+                        <span class="metric-value">8.7ms</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">p99</span>
+                        <span class="metric-value">15.3ms</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">p99.9</span>
+                        <span class="metric-value">42.1ms</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Max</span>
+                        <span class="metric-value">127ms</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Service Health</h3>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">HRS API Server</span>
+                    <span class="metric-value"><span class="badge badge-success">Healthy</span> 10/10 pods running</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">PostgreSQL (Handle DB)</span>
+                    <span class="metric-value"><span class="badge badge-success">Healthy</span> Primary + 2 replicas</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Redis Cache Cluster</span>
+                    <span class="metric-value"><span class="badge badge-success">Healthy</span> 3 master + 3 replica</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Load Balancer</span>
+                    <span class="metric-value"><span class="badge badge-success">Healthy</span> 847 req/s</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Activity</h3>
+                </div>
+                <div class="alert alert-success">
+                    <span>✓</span>
+                    <div>
+                        <strong>Cache Warmup Complete</strong><br>
+                        Successfully warmed 15,234 handles • 2 minutes ago
+                    </div>
+                </div>
+                <div class="alert alert-warning">
+                    <span>⚠</span>
+                    <div>
+                        <strong>Elevated Latency Detected</strong><br>
+                        p99 latency spiked to 45ms for 30 seconds • 15 minutes ago • Auto-resolved
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Metrics Page -->
+        <div id="page-metrics" class="page">
+            <div class="header">
+                <div>
+                    <h2>Real-Time Metrics</h2>
+                    <div class="header-meta">Live data • Auto-refresh: 5s</div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Handles</div>
+                    <div class="stat-value">127.5K</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Lookups (24h)</div>
+                    <div class="stat-value">2.4M</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Unique Users (24h)</div>
+                    <div class="stat-value">45.2K</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Lookups/User</div>
+                    <div class="stat-value">53</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Cache Performance</h3>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Cache Hits (24h)</span>
+                    <span class="metric-value">2,273,280 (94.7%)</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 94.7%;"></div>
+                </div>
+                <div class="metric-row" style="margin-top: 12px;">
+                    <span class="metric-label">Cache Misses (24h)</span>
+                    <span class="metric-value">126,720 (5.3%)</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 5.3%; background: #db6d28;"></div>
+                </div>
+                <div class="metric-row" style="margin-top: 16px;">
+                    <span class="metric-label">Redis Memory Usage</span>
+                    <span class="metric-value">4.2 GB / 16 GB (26%)</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 26%;"></div>
+                </div>
+                <div class="metric-row" style="margin-top: 12px;">
+                    <span class="metric-label">Eviction Policy</span>
+                    <span class="metric-value">allkeys-lru</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Database Performance</h3>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Active Connections</span>
+                    <span class="metric-value">127 / 200</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Avg Query Time</span>
+                    <span class="metric-value">2.3ms</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Slow Queries (>50ms)</span>
+                    <span class="metric-value">3 (0.001%)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Replication Lag</span>
+                    <span class="metric-value">12ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Page -->
+        <div id="page-performance" class="page">
+            <div class="header">
+                <h2>Performance Analysis</h2>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Slowest Endpoints (p99 latency)</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>p50</th>
+                            <th>p95</th>
+                            <th>p99</th>
+                            <th>Calls (24h)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showEndpointDetail('/api/v1/handles/resolve')">
+                            <td><code>/api/v1/handles/resolve</code></td>
+                            <td>3.2ms</td>
+                            <td>8.7ms</td>
+                            <td>15.3ms</td>
+                            <td>2,267,892</td>
+                            <td><span class="badge badge-success">Optimal</span></td>
+                        </tr>
+                        <tr onclick="showEndpointDetail('/api/v1/handles/search')">
+                            <td><code>/api/v1/handles/search</code></td>
+                            <td>12.5ms</td>
+                            <td>28.3ms</td>
+                            <td>67.2ms</td>
+                            <td>45,231</td>
+                            <td><span class="badge badge-warning">Slow</span></td>
+                        </tr>
+                        <tr onclick="showEndpointDetail('/api/v1/fraud/check')">
+                            <td><code>/api/v1/fraud/check</code></td>
+                            <td>5.1ms</td>
+                            <td>12.3ms</td>
+                            <td>24.8ms</td>
+                            <td>1,892,341</td>
+                            <td><span class="badge badge-success">Optimal</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Query Performance</h3>
+                    <button class="btn" onclick="showModal('optimize-modal')">Optimize Queries</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Avg Time</th>
+                            <th>Calls</th>
+                            <th>Total Time</th>
+                            <th>Optimization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>SELECT * FROM handles WHERE handle = ?</code></td>
+                            <td>1.2ms</td>
+                            <td>126,720</td>
+                            <td>152s</td>
+                            <td><span class="badge badge-success">Indexed</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT * FROM handle_activity WHERE ...</code></td>
+                            <td>8.5ms</td>
+                            <td>12,341</td>
+                            <td>104s</td>
+                            <td><span class="badge badge-warning">Needs Index</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Handle Registry Page -->
+        <div id="page-registry" class="page">
+            <div class="header">
+                <div>
+                    <h2>Handle Registry</h2>
+                    <div class="header-meta">127,543 registered handles</div>
+                </div>
+                <button class="btn btn-primary" onclick="showModal('create-handle-modal')">Create Handle</button>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <input type="text" class="form-input" placeholder="Search handles (@handle, wallet_id, or balance_id)..." id="handle-search">
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Handle</th>
+                            <th>Wallet ID</th>
+                            <th>Balance ID</th>
+                            <th>Trice VA</th>
+                            <th>Network</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showHandleDetail('@jane')">
+                            <td><code>@jane</code></td>
+                            <td><code>wal_001</code></td>
+                            <td><code>bal_001</code></td>
+                            <td><code>TRICE_VA_001</code></td>
+                            <td>titan-wallet</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>Jan 10, 2025</td>
+                        </tr>
+                        <tr onclick="showHandleDetail('@emily')">
+                            <td><code>@emily</code></td>
+                            <td><code>wal_002</code></td>
+                            <td><code>bal_002</code></td>
+                            <td><code>TRICE_VA_002</code></td>
+                            <td>titan-wallet</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>Dec 28, 2024</td>
+                        </tr>
+                        <tr onclick="showHandleDetail('@bob')">
+                            <td><code>@bob</code></td>
+                            <td><code>wal_003</code></td>
+                            <td><code>bal_003</code></td>
+                            <td><code>TRICE_VA_003</code></td>
+                            <td>titan-wallet</td>
+                            <td><span class="badge badge-error">Suspended</span></td>
+                            <td>Jan 5, 2025</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Routing Analytics Page -->
+        <div id="page-routing" class="page">
+            <div class="header">
+                <h2>Routing Analytics</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Same-Network (24h)</div>
+                    <div class="stat-value">1.8M</div>
+                    <div class="stat-change">75% of total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cross-Network (24h)</div>
+                    <div class="stat-value">600K</div>
+                    <div class="stat-change">25% of total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Same-Network Time</div>
+                    <div class="stat-value">3.2ms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Cross-Network Time</div>
+                    <div class="stat-value">12.7ms</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Top External Networks (24h)</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Network</th>
+                            <th>Lookups</th>
+                            <th>% of Cross-Network</th>
+                            <th>Avg Latency</th>
+                            <th>Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>@phonepe</code></td>
+                            <td>234,567</td>
+                            <td>39.1%</td>
+                            <td>11.2ms</td>
+                            <td>99.92%</td>
+                        </tr>
+                        <tr>
+                            <td><code>@venmo</code></td>
+                            <td>187,234</td>
+                            <td>31.2%</td>
+                            <td>13.8ms</td>
+                            <td>99.87%</td>
+                        </tr>
+                        <tr>
+                            <td><code>@cashapp</code></td>
+                            <td>98,765</td>
+                            <td>16.5%</td>
+                            <td>14.2ms</td>
+                            <td>99.91%</td>
+                        </tr>
+                        <tr>
+                            <td><code>@zelle</code></td>
+                            <td>79,434</td>
+                            <td>13.2%</td>
+                            <td>15.7ms</td>
+                            <td>99.78%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cache Management Page -->
+        <div id="page-cache" class="page">
+            <div class="header">
+                <div>
+                    <h2>Cache Management</h2>
+                    <div class="header-meta">Redis Cluster • 3 Master + 3 Replica</div>
+                </div>
+                <button class="btn btn-danger" onclick="confirmCacheFlush()">Flush Cache</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Memory Used</div>
+                    <div class="stat-value">4.2GB</div>
+                    <div class="stat-change">26% of 16GB</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Keys Cached</div>
+                    <div class="stat-value">127.5K</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Hit Rate (24h)</div>
+                    <div class="stat-value">94.7%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Evictions (24h)</div>
+                    <div class="stat-value">1,234</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Cache Warmup</h3>
+                    <button class="btn btn-primary" onclick="warmupCache()">Start Warmup</button>
+                </div>
+                <div class="alert alert-success">
+                    <span>ℹ</span>
+                    <div>
+                        Last warmup: 2 hours ago • Warmed 15,234 handles in 45 seconds
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Warmup Strategy</label>
+                    <select class="form-select">
+                        <option>Top 10K Most Active Handles</option>
+                        <option>All Handles (Full Warmup)</option>
+                        <option>Custom Query</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Hot Keys (Most Accessed)</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cache Key</th>
+                            <th>Hits (1h)</th>
+                            <th>TTL</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>handle:@jane</code></td>
+                            <td>12,345</td>
+                            <td>23h 45m</td>
+                            <td>1.2 KB</td>
+                        </tr>
+                        <tr>
+                            <td><code>handle:@emily</code></td>
+                            <td>9,876</td>
+                            <td>23h 12m</td>
+                            <td>1.1 KB</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Fraud Rules Page -->
+        <div id="page-fraud" class="page">
+            <div class="header">
+                <div>
+                    <h2>Fraud Detection Rules</h2>
+                    <div class="header-meta">12 active rules</div>
+                </div>
+                <button class="btn btn-primary" onclick="showModal('add-rule-modal')">Add Rule</button>
+            </div>
+
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rule Name</th>
+                            <th>Condition</th>
+                            <th>Action</th>
+                            <th>Triggers (24h)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Velocity Limit</td>
+                            <td>More than 10 txns in 1 hour</td>
+                            <td><span class="badge badge-error">Block</span></td>
+                            <td>17</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>
+                                <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="editRule('velocity')">Edit</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Large Amount</td>
+                            <td>Single transaction > $1,000</td>
+                            <td><span class="badge badge-warning">Challenge</span></td>
+                            <td>42</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>
+                                <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="editRule('large-amount')">Edit</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>New Recipient Risk</td>
+                            <td>First transaction to recipient > $500</td>
+                            <td><span class="badge badge-warning">Challenge</span></td>
+                            <td>127</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td>
+                                <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="editRule('new-recipient')">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Risk Scoring Weights</h3>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Velocity Score (0-30)</span>
+                    <input type="range" min="0" max="30" value="20" style="flex: 1; margin: 0 12px;">
+                    <span class="metric-value">20</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Amount Anomaly (0-25)</span>
+                    <input type="range" min="0" max="25" value="15" style="flex: 1; margin: 0 12px;">
+                    <span class="metric-value">15</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Location Change (0-20)</span>
+                    <input type="range" min="0" max="20" value="10" style="flex: 1; margin: 0 12px;">
+                    <span class="metric-value">10</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">New Recipient (0-15)</span>
+                    <input type="range" min="0" max="15" value="8" style="flex: 1; margin: 0 12px;">
+                    <span class="metric-value">8</span>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 16px;">Save Weights</button>
+            </div>
+        </div>
+
+        <!-- Rate Limiting Page -->
+        <div id="page-rate-limits" class="page">
+            <div class="header">
+                <h2>API Rate Limiting</h2>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Endpoint Rate Limits</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Unauthenticated</th>
+                            <th>Authenticated</th>
+                            <th>Burst Limit</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/v1/handles/resolve</code></td>
+                            <td>5 req/min</td>
+                            <td>30 req/min</td>
+                            <td>50 req/min</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/v1/handles/search</code></td>
+                            <td>3 req/min</td>
+                            <td>20 req/min</td>
+                            <td>30 req/min</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/v1/fraud/check</code></td>
+                            <td>N/A</td>
+                            <td>100 req/min</td>
+                            <td>200 req/min</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Rate Limit Violations (24h)</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Endpoint</th>
+                            <th>Violations</th>
+                            <th>Last Violation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>203.0.113.42</code></td>
+                            <td><code>/api/v1/handles/resolve</code></td>
+                            <td>127</td>
+                            <td>5 min ago</td>
+                            <td>
+                                <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;">Block IP</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Alerts Page -->
+        <div id="page-alerts" class="page">
+            <div class="header">
+                <div>
+                    <h2>Alert Configuration</h2>
+                    <div class="header-meta">8 active alerts</div>
+                </div>
+                <button class="btn btn-primary" onclick="showModal('create-alert-modal')">Create Alert</button>
+            </div>
+
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Alert Name</th>
+                            <th>Condition</th>
+                            <th>Threshold</th>
+                            <th>Channel</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>High Latency</td>
+                            <td>p99 latency > 50ms for 5 minutes</td>
+                            <td>50ms</td>
+                            <td>PagerDuty + Slack</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cache Hit Rate Drop</td>
+                            <td>Hit rate < 90% for 10 minutes</td>
+                            <td>90%</td>
+                            <td>Slack #hrs-ops</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Error Rate Spike</td>
+                            <td>Error rate > 1% for 2 minutes</td>
+                            <td>1%</td>
+                            <td>PagerDuty</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Configuration Page -->
+        <div id="page-config" class="page">
+            <div class="header">
+                <h2>System Configuration</h2>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">HRS Configuration</h3>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cache TTL (seconds)</label>
+                    <input type="number" class="form-input" value="86400" placeholder="86400">
+                    <small style="color: #8b949e; font-size: 11px;">Default: 24 hours (86400 seconds)</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max Concurrent Queries</label>
+                    <input type="number" class="form-input" value="200" placeholder="200">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Query Timeout (ms)</label>
+                    <input type="number" class="form-input" value="5000" placeholder="5000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Enable Request Logging</label>
+                    <select class="form-select">
+                        <option>Errors Only</option>
+                        <option selected>All Requests</option>
+                        <option>Disabled</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="handle-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Handle Details: <span id="modal-handle"></span></h3>
+                <button class="close-btn" onclick="closeModal('handle-detail-modal')">×</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchModalTab(event, 'info')">Info</div>
+                <div class="tab" onclick="switchModalTab(event, 'activity')">Activity</div>
+                <div class="tab" onclick="switchModalTab(event, 'cache')">Cache</div>
+            </div>
+
+            <div id="modal-tab-info" class="tab-content active">
+                <div class="metric-row">
+                    <span class="metric-label">Handle</span>
+                    <span class="metric-value"><code>@jane</code></span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Wallet ID</span>
+                    <span class="metric-value"><code>wal_001</code></span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Balance ID (Blnk)</span>
+                    <span class="metric-value"><code>bal_001</code></span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Trice Virtual Account</span>
+                    <span class="metric-value"><code>TRICE_VA_001</code></span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Network</span>
+                    <span class="metric-value">titan-wallet</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Status</span>
+                    <span class="metric-value"><span class="badge badge-success">Active</span></span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Verified</span>
+                    <span class="metric-value">Yes ✓</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Created</span>
+                    <span class="metric-value">Jan 10, 2025 14:23:45 UTC</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Last Updated</span>
+                    <span class="metric-value">Jan 15, 2025 08:12:03 UTC</span>
+                </div>
+            </div>
+
+            <div id="modal-tab-activity" class="tab-content">
+                <div class="metric-row">
+                    <span class="metric-label">Total Lookups</span>
+                    <span class="metric-value">127,345</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Lookups (24h)</span>
+                    <span class="metric-value">12,345</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Avg Lookups/Day</span>
+                    <span class="metric-value">8,234</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Last Lookup</span>
+                    <span class="metric-value">2 seconds ago</span>
+                </div>
+            </div>
+
+            <div id="modal-tab-cache" class="tab-content">
+                <div class="metric-row">
+                    <span class="metric-label">Cache Key</span>
+                    <span class="metric-value"><code>handle:@jane</code></span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Cached</span>
+                    <span class="metric-value">Yes ✓</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">TTL Remaining</span>
+                    <span class="metric-value">23h 45m 12s</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Cache Hits (24h)</span>
+                    <span class="metric-value">12,345</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Size</span>
+                    <span class="metric-value">1.2 KB</span>
+                </div>
+                <button class="btn btn-danger" style="margin-top: 16px;">Invalidate Cache</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-handle-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Handle</h3>
+                <button class="close-btn" onclick="closeModal('create-handle-modal')">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Handle</label>
+                <input type="text" class="form-input" placeholder="@newhandle">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Wallet ID</label>
+                <input type="text" class="form-input" placeholder="wal_">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Balance ID (Blnk)</label>
+                <input type="text" class="form-input" placeholder="bal_">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Network</label>
+                <select class="form-select">
+                    <option>titan-wallet</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">Create Handle</button>
+        </div>
+    </div>
+
+    <div id="add-rule-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Fraud Rule</h3>
+                <button class="close-btn" onclick="closeModal('add-rule-modal')">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rule Name</label>
+                <input type="text" class="form-input" placeholder="High Value Transaction">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Condition</label>
+                <textarea class="form-textarea" placeholder="amount > 5000 AND new_recipient = true"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Action</label>
+                <select class="form-select">
+                    <option>Block</option>
+                    <option>Challenge (2FA)</option>
+                    <option>Flag for Review</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">Create Rule</button>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Modals
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Modal Tabs
+        function switchModalTab(event, tabName) {
+            const modal = event.target.closest('.modal-content');
+            modal.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            modal.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            modal.querySelector('#modal-tab-' + tabName).classList.add('active');
+        }
+
+        // Actions
+        function showHandleDetail(handle) {
+            document.getElementById('modal-handle').textContent = handle;
+            showModal('handle-detail-modal');
+        }
+
+        function showEndpointDetail(endpoint) {
+            alert(`Endpoint Details: ${endpoint}\n\nDetailed performance metrics would be shown here.`);
+        }
+
+        function confirmCacheFlush() {
+            if (confirm('Are you sure you want to flush the entire cache? This will temporarily increase database load.')) {
+                alert('Cache flush initiated. This may take a few seconds.');
+            }
+        }
+
+        function warmupCache() {
+            alert('Cache warmup started. Warming 15,234 handles...');
+            setTimeout(() => {
+                alert('Cache warmup complete! 15,234 handles cached in 45 seconds.');
+            }, 2000);
+        }
+
+        function editRule(ruleId) {
+            alert(`Edit Fraud Rule: ${ruleId}`);
+        }
+
+        // Simulate live metrics update
+        setInterval(() => {
+            const reqsSec = document.querySelector('.stat-value');
+            if (reqsSec && reqsSec.textContent.match(/^\d+$/)) {
+                const current = parseInt(reqsSec.textContent);
+                reqsSec.textContent = current + Math.floor(Math.random() * 20) - 10;
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
